@@ -14,8 +14,7 @@
 #' @param refspec string with mapping between remote and local refs
 git_fetch <- function(remote = NULL, refspec = NULL, password = askpass,
                       ssh_key = NULL, verbose = interactive(), repo = '.'){
-  if(is.character(repo))
-    repo <- git_open(repo)
+  repo <- git_open(repo)
   info <- git_info(repo)
   if(!length(remote))
     remote <- info$remote
@@ -26,7 +25,7 @@ git_fetch <- function(remote = NULL, refspec = NULL, password = askpass,
     refspec <- info$head
   refspec <- as.character(refspec)
   verbose <- as.logical(verbose)
-  host <- remote_to_host(repo, info$remote)
+  host <- remote_to_host(repo, remote)
   key_cb <- make_key_cb(ssh_key, host = host, password = password)
   cred_cb <- make_cred_cb(password = password, verbose = verbose)
   .Call(R_git_remote_fetch, repo, remote, refspec, key_cb, cred_cb, verbose)
@@ -37,8 +36,7 @@ git_fetch <- function(remote = NULL, refspec = NULL, password = askpass,
 #' @useDynLib gert R_git_remote_push
 git_push <- function(remote = NULL, refspec = NULL, password = askpass,
                      ssh_key = NULL, verbose = interactive(), repo = '.'){
-  if(is.character(repo))
-    repo <- git_open(repo)
+  repo <- git_open(repo)
   info <- git_info(repo)
   if(!length(remote))
     remote <- info$remote
@@ -49,10 +47,14 @@ git_push <- function(remote = NULL, refspec = NULL, password = askpass,
     refspec <- info$head
   refspec <- as.character(refspec)
   verbose <- as.logical(verbose)
-  host <- remote_to_host(repo, info$remote)
+  host <- remote_to_host(repo, remote)
   key_cb <- make_key_cb(ssh_key, host = host, password = password)
   cred_cb <- make_cred_cb(password = password, verbose = verbose)
   .Call(R_git_remote_push, repo, remote, refspec, key_cb, cred_cb, verbose)
+  if(isTRUE(is.na(info$upstream))){
+    git_branch_set_upstream(paste0(remote, "/", info$shorthand))
+  }
+  repo
 }
 
 #' @export
@@ -65,7 +67,7 @@ git_push <- function(remote = NULL, refspec = NULL, password = askpass,
 #' look for keys in `ssh-agent` and [credentials::ssh_key_info].
 #' @param branch name of branch to check out locally
 #' @param password a string or a callback function to get passwords for authentication
-#' or password proctected ssh keys. Defaults to [askpass][askpass::askpass] which
+#' or password protected ssh keys. Defaults to [askpass][askpass::askpass] which
 #' checks `getOption('askpass')`.
 #' @param verbose display some progress info while downloading
 #' @examples {# Clone a small repository
@@ -115,8 +117,7 @@ git_clone <- function(url, path = NULL, branch = NULL, password = askpass,
 #' @rdname fetch
 #' @param ... arguments passed to [git_fetch]
 git_pull <- function(..., repo = '.'){
-  if(is.character(repo))
-    repo <- git_open(repo)
+  repo <- git_open(repo)
   info <- git_info(repo)
   if(!length(info$upstream) || is.na(info$upstream) || !nchar(info$upstream))
     stop("No upstream configured for current HEAD")
