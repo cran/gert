@@ -2,14 +2,11 @@
 % Please edit documentation in R/config.R
 \name{git_config}
 \alias{git_config}
-\alias{libgit2_config}
 \alias{git_config_global}
 \alias{git_config_set}
 \alias{git_config_global_set}
-\title{Version info}
+\title{Get or set Git configuration}
 \usage{
-libgit2_config()
-
 git_config(repo = ".")
 
 git_config_global()
@@ -19,19 +16,76 @@ git_config_set(name, value, repo = ".")
 git_config_global_set(name, value)
 }
 \arguments{
-\item{repo}{a path to an existing repository, or a \code{git_repository} object as
-returned by \link{git_open},  \link{git_init} or \link{git_clone}.}
+\item{repo}{The path to the git repository. If the directory is not a
+repository, parent directories are considered (see \link{git_find}). To disable
+this search, provide the filepath protected with \code{\link[=I]{I()}}.}
 
-\item{name}{setting name}
+\item{name}{Name of the option to set}
 
-\item{value}{setting value, must be string, bool, number or NULL}
+\item{value}{Value to set. Must be a string, logical, number or \code{NULL} (to
+unset).}
+}
+\value{
+\itemize{
+\item \code{git_config()}: a \code{data.frame} of the Git options "in force" in the context
+of \code{repo}, one row per option. The \code{level} column reveals whether the
+option is determined from global or local config.
+\item \code{git_config_global()}: a \code{data.frame}, as for \code{git_config()}, except only
+for global Git options.
+\item \code{git_config_set()}, \code{git_config_global_set()}: The previous value of
+\code{name} in local or global config, respectively. If this option was
+previously unset, returns \code{NULL}. Returns invisibly.
+}
 }
 \description{
-Shows the version of libgit2 and which features have been enabled.
+Get or set Git options, as \verb{git config} does on the command line. \strong{Global}
+settings affect all of a user's Git operations (\verb{git config --global}),
+whereas \strong{local} settings are scoped to a specific repository (\verb{git config --local}). When both exist, local options always win. Four functions address
+the four possible combinations of getting vs setting and global vs. local.\tabular{lll}{
+    \tab \strong{local} \tab \strong{global} \cr
+   get \tab \code{git_config()} \tab \code{git_config_global()} \cr
+   set \tab \code{git_config_set()} \tab \code{git_config_global_set()} \cr
+}
+}
+\examples{
+# Set and inspect a local, custom Git option
+r <- file.path(tempdir(), "gert-demo")
+git_init(r)
+
+previous <- git_config_set("aaa.bbb", "ccc", repo = r)
+previous
+cfg <- git_config(repo = r)
+subset(cfg, level == "local")
+cfg$value[cfg$name == "aaa.bbb"]
+
+previous <- git_config_set("aaa.bbb", NULL, repo = r)
+previous
+cfg <- git_config(repo = r)
+subset(cfg, level == "local")
+cfg$value[cfg$name == "aaa.bbb"]
+
+unlink(r, recursive = TRUE)
+
+\dontrun{
+# Set global Git options
+git_config_global_set("user.name", "Your Name")
+git_config_global_set("user.email", "your@email.com")
+git_config_global()
+}
 }
 \seealso{
-Other git: \code{\link{branch}}, \code{\link{commit}},
-  \code{\link{fetch}}, \code{\link{repository}},
-  \code{\link{signature}}
+Other git: 
+\code{\link{git_archive}},
+\code{\link{git_branch}()},
+\code{\link{git_commit}()},
+\code{\link{git_diff}()},
+\code{\link{git_fetch}()},
+\code{\link{git_merge}()},
+\code{\link{git_rebase}()},
+\code{\link{git_remote}},
+\code{\link{git_repo}},
+\code{\link{git_signature}()},
+\code{\link{git_stash}},
+\code{\link{git_tag}}
 }
 \concept{git}

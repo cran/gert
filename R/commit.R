@@ -1,53 +1,129 @@
 #' Stage and commit changes
 #'
-#' @description To commit changes, start with *staging* the files to be included
-#' in the commit using [git_add()] or [git_rm()]. Use [git_status()] to see an
-#' overview of staged and unstaged changes, and finally [git_commit()] creates
-#' a new commit with currently staged files.
+#' @description
+#' To commit changes, start by *staging* the files to be included in the commit
+#' using `git_add()` or `git_rm()`. Use `git_status()` to see an overview of
+#' staged and unstaged changes, and finally `git_commit()` creates a new commit
+#' with currently staged files.
 #'
-#' [git_commit_all] is a shorthand that will automatically stage all new and
-#' modified files and then commit.
+#' `git_commit_all()` is a convenience function that automatically stages and
+#' commits all modified files. Note that `git_commit_all()` does **not** add
+#' new, untracked files to the repository. You need to make an explicit call to
+#' `git_add()` to start tracking new files.
 #'
-#' Also [git_log()] shows the most recent commits and [git_ls()] lists
-#' all the files that are being tracked in the repository.
+#' `git_log()` shows the most recent commits and `git_ls()` lists all the files
+#' that are being tracked in the repository.
+#'
 #' @export
-#' @rdname commit
-#' @name commit
+#' @rdname git_commit
+#' @name git_commit
 #' @family git
-#' @inheritParams repository
+#' @inheritParams git_open
 #' @param message a commit message
-#' @param author A [git_signature] value, default is [git_signature_default].
+#' @param author A [git_signature] value, default is [git_signature_default()].
 #' @param committer A [git_signature] value, default is same as `author`
+#' @return
+#' * `git_status()`, `git_ls()`: A data frame with one row per file
+#' * `git_log()`: A data frame with one row per commit
+#' * `git_commit()`, `git_commit_all()`: A SHA
 #' @useDynLib gert R_git_commit_create
+#' @examples
+#' oldwd <- getwd()
+#' repo <- file.path(tempdir(), "myrepo")
+#' git_init(repo)
+#' setwd(repo)
+#'
+#' # Set a user if no default
+#' if(!user_is_configured()){
+#'   git_config_set("user.name", "Jerry")
+#'   git_config_set("user.email", "jerry@gmail.com")
+#' }
+#'
+#' writeLines(letters[1:6], "alphabet.txt")
+#' git_status()
+#'
+#' git_add("alphabet.txt")
+#' git_status()
+#'
+#' git_commit("Start alphabet file")
+#' git_status()
+#'
+#' git_ls()
+#'
+#' git_log()
+#'
+#' cat(letters[7:9], file = "alphabet.txt", sep = "\n", append = TRUE)
+#' git_status()
+#'
+#' git_commit_all("Add more letters")
+#'
+#' # cleanup
+#' setwd(oldwd)
+#' unlink(repo, recursive = TRUE)
 git_commit <- function(message, author = NULL, committer = NULL, repo = '.'){
   repo <- git_open(repo)
-  if(!length(author))
-    author <- git_signature_default(repo)
-  if(!length(committer))
+  if(!length(author)) {
+    author <- git_signature_default(repo = repo)
+  } else {
+    git_signature_parse(author) #validate
+  }
+  if(!length(committer)){
     committer <- author
+  } else {
+    git_signature_parse(committer)  #validate
+  }
   stopifnot(is.character(message), length(message) == 1)
-  status <- git_status(repo)
+  status <- git_status(repo = repo)
   if(!any(status$staged))
     stop("No staged files to commit. Run git_add() to select files.")
-  .Call(R_git_commit_create, repo, message, author, committer)
+  merge_parents <- git_merge_parent_heads(repo = repo)
+  .Call(R_git_commit_create, repo, message, author, committer, merge_parents)
 }
 
 #' @export
-#' @rdname commit
+#' @rdname git_commit
 git_commit_all <- function(message, author = NULL, committer = NULL, repo = '.'){
   repo <- git_open(repo)
-  stat <- git_status(repo)
-  changes <- stat$file[!stat$staged && stat$status %in% c("modified", "renamed", "typechange")]
+  unstaged <- git_status(staged = FALSE, repo = repo)
+
+  changes <- unstaged$file[unstaged$status %in% c("modified", "renamed", "typechange")]
   if(length(changes))
     git_add(changes, repo = repo)
-  deleted <- stat$file[!stat$staged && stat$status == "deleted"]
+
+  deleted <- unstaged$file[unstaged$status == "deleted"]
   if(length(deleted))
     git_rm(deleted, repo = repo)
+
   git_commit(message = message, author = author, committer = committer, repo = repo)
 }
 
 #' @export
-#' @rdname commit
+#' @rdname git_commit
+#' @useDynLib gert R_git_commit_info
+git_commit_info <- function(ref = "HEAD", repo = '.'){
+  repo <- git_open(repo)
+  .Call(R_git_commit_info, repo, ref)
+}
+
+#' @export
+#' @rdname git_commit
+#' @useDynLib gert R_git_commit_id
+git_commit_id <- function(ref = "HEAD", repo = '.'){
+  repo <- git_open(repo)
+  .Call(R_git_commit_id, repo, ref)
+}
+
+#' @export
+#' @rdname git_commit
+#' @param ancestor a reference to a potential ancestor commit
+#' @useDynLib gert R_git_commit_descendant
+git_commit_descendant_of <- function(ancestor, ref = 'HEAD', repo = '.'){
+  repo <- git_open(repo)
+  .Call(R_git_commit_descendant, repo, ref, ancestor)
+}
+
+#' @export
+#' @rdname git_commit
 #' @param files vector of paths relative to the git root directory.
 #' Use `"."` to stage all changed files.
 #' @param force add files even if in gitignore
@@ -58,28 +134,42 @@ git_add <- function(files, force = FALSE, repo = '.'){
   normalizePath(file.path(info$path, files), mustWork = FALSE)
   force <- as.logical(force)
   .Call(R_git_repository_add, repo, files, force)
+  git_status(repo = repo)
 }
 
 #' @export
-#' @rdname commit
+#' @rdname git_commit
 #' @useDynLib gert R_git_repository_rm
 git_rm <- function(files, repo = '.'){
   repo <- git_open(repo)
   info <- git_info(repo)
   normalizePath(file.path(info$path, files), mustWork = FALSE)
   .Call(R_git_repository_rm, repo, files)
+  git_status(repo = repo)
 }
 
 #' @export
-#' @rdname commit
+#' @rdname git_commit
 #' @useDynLib gert R_git_status_list
-git_status <- function(repo = '.'){
+#' @param staged return only staged (TRUE) or unstaged files (FALSE).
+#' Use `NULL` or `NA` to show both (default).
+git_status <- function(staged = NULL, repo = '.'){
   repo <- git_open(repo)
-  .Call(R_git_status_list, repo)
+  staged <- as.logical(staged)
+  df <- .Call(R_git_status_list, repo, staged)
+  df[order(df$file), ,drop = FALSE]
 }
 
 #' @export
-#' @rdname commit
+#' @rdname git_commit
+#' @useDynLib gert R_git_conflict_list
+git_conflicts <- function(repo = '.'){
+  repo <- git_open(repo)
+  .Call(R_git_conflict_list, repo)
+}
+
+#' @export
+#' @rdname git_commit
 #' @useDynLib gert R_git_repository_ls
 git_ls <- function(repo = '.'){
   repo <- git_open(repo)
@@ -87,38 +177,15 @@ git_ls <- function(repo = '.'){
 }
 
 #' @export
-#' @rdname commit
+#' @rdname git_commit
 #' @useDynLib gert R_git_commit_log
-#' @param ref string with a branch/tag/commit
+#' @param ref revision string with a branch/tag/commit value
 #' @param max lookup at most latest n parent commits
 git_log <- function(ref = "HEAD", max = 100, repo = "."){
   repo <- git_open(repo)
   ref <- as.character(ref)
   max <- as.integer(max)
   .Call(R_git_commit_log, repo, ref, max)
-}
-
-#' @export
-#' @rdname commit
-#' @useDynLib gert R_git_reset
-#' @param type must be one of `"soft"`, `"hard"`, or `"mixed"`
-git_reset <- function(type = c("soft", "hard", "mixed"), ref = "HEAD", repo = "."){
-  typenum <- switch(match.arg(type), soft = 1L, mixed = 2L, hard = 3L)
-  repo <- git_open(repo)
-  ref <- as.character(ref)
-  .Call(R_git_reset, repo, ref, typenum)
-}
-
-#' @export
-#' @useDynLib gert R_git_signature_info
-print.git_sig_ptr <- function(x, ...){
-  info <- git_signature_info(x)
-  cat(sprintf("<git signature>: %s at %s\n", info$author, as.character(info$time)))
-}
-
-git_signature_info <- function(signature){
-  stopifnot(inherits(signature, 'git_sig_ptr'))
-  .Call(R_git_signature_info, signature)
 }
 
 assert_string <- function(x){

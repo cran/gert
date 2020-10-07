@@ -1,40 +1,55 @@
-#' Create or open a git repository
+#' Create or discover a local Git repository
 #'
-#' Use [git_init()] to start a new repository or [git_clone()] to download a
-#' repository from a remote.
+#' Use `git_init()` to create a new repository or `git_find()` to discover an
+#' existing local repository. `git_info()` shows basic information about a
+#' repository, such as the SHA and branch of the current HEAD.
 #'
-#' You may use [git_find()] and [git_open()] to explicitly discover and open
-#' existing git repositories, but this is usually not needed because all gert
-#' functions also take a path argument which implicitly opens the repo.
+#' For `git_init()` the `path` parameter sets the directory of the git repository
+#' to create. If this directory already exists, it must be empty. If it does
+#' not exist, it is created, along with any intermediate directories that don't
+#' yet exist. For `git_find()` the `path` arguments specifies the directory at
+#' which to start the search for a git repository. If it is not a git repository
+#' itself, then its parent directory is consulted, then the parent's parent, and
+#' so on.
 #'
 #' @export
-#' @rdname repository
-#' @name repository
+#' @rdname git_repo
+#' @name git_repo
 #' @family git
-#' @param path directory of the git repository. For `git_init` or `git_clone`
-#' this must be a non-existing or empty directory.
 #' @useDynLib gert R_git_repository_init
+#' @inheritParams git_open
+#' @param path the location of the git repository, see details.
+#' @return The path to the Git repository.
+#' @examples
+#' # directory does not yet exist
+#' r <- tempfile(pattern = "gert")
+#' git_init(r)
+#' git_find(r)
+#'
+#' # create a child directory, then a grandchild, then search
+#' r_grandchild_dir <- file.path(r, "aaa", "bbb")
+#' dir.create(r_grandchild_dir, recursive = TRUE)
+#' git_find(r_grandchild_dir)
+#'
+#' # cleanup
+#' unlink(r, recursive = TRUE)
+#'
+#' # directory exists but is empty
+#' r <- tempfile(pattern = "gert")
+#' dir.create(r)
+#' git_init(r)
+#' git_find(r)
+#'
+#' # cleanup
+#' unlink(r, recursive = TRUE)
 git_init <- function(path = '.'){
   path <- normalizePath(path.expand(path), mustWork = FALSE)
-  .Call(R_git_repository_init, path)
+  repo <- .Call(R_git_repository_init, path)
+  git_repo_path(repo)
 }
 
 #' @export
-#' @rdname repository
-#' @useDynLib gert R_git_repository_open
-git_open <- function(path = '.'){
-  if(inherits(path, 'git_repo_ptr')){
-    return(path)
-  } else if(!is.character(path)){
-    stop("repo argument must be a path or an existing repository object")
-  }
-  path <- normalizePath(path.expand(path), mustWork = FALSE)
-  search <- !inherits(path, 'AsIs')
-  .Call(R_git_repository_open, path, search)
-}
-
-#' @export
-#' @rdname repository
+#' @rdname git_repo
 #' @useDynLib gert R_git_repository_find
 git_find <- function(path = '.'){
   path <- normalizePath(path.expand(path), mustWork = FALSE)
@@ -43,23 +58,9 @@ git_find <- function(path = '.'){
 }
 
 #' @export
-#' @rdname repository
-#' @param repo a path to an existing repository, or a `git_repository` object as
-#' returned by [git_open],  [git_init] or [git_clone].
+#' @rdname git_repo
 #' @useDynLib gert R_git_repository_info
 git_info <- function(repo = '.'){
   repo <- git_open(repo)
   .Call(R_git_repository_info, repo)
-}
-
-#' @export
-print.git_repo_ptr <- function(x, ...){
-  info <- git_info(x)
-
-  type = "git repository"
-  if(info$bare){
-    type = paste(type, "(bare)")
-  }
-
-  cat(sprintf("<%s>: %s[@%s]\n", type, normalizePath(info$path), info$shorthand))
 }

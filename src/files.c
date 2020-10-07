@@ -51,7 +51,15 @@ SEXP R_git_repository_info(SEXP ptr){
     git_reference_free(head);
   }
 
-  return build_list(8, "path", path, "bare", bare, "head", headref, "shorthand", shorthand, "commit", target, "remote", remote, "upstream", upstream, "reflist", refs);
+  return build_list(8, "path", path, "bare", bare, "head", headref, "shorthand", shorthand,
+                    "commit", target, "remote", remote, "upstream", upstream, "reflist", refs);
+}
+
+SEXP R_git_repository_path(SEXP ptr){
+  git_repository *repo = get_git_repository(ptr);
+  return safe_string(
+    git_repository_is_bare(repo) ? git_repository_path(repo) : git_repository_workdir(repo)
+  );
 }
 
 SEXP R_git_repository_ls(SEXP ptr){
@@ -84,7 +92,7 @@ SEXP R_git_repository_add(SEXP ptr, SEXP files, SEXP force){
   bail_if(git_repository_index(&index, repo), "git_repository_index");
   git_strarray *paths = files_to_array(files);
   git_index_add_option_t flags = Rf_asLogical(force) ? GIT_INDEX_ADD_FORCE : GIT_INDEX_ADD_DEFAULT;
-  bail_if(git_index_add_all(index, paths, flags, NULL, NULL), "git_index_add_bypath");
+  bail_if(git_index_add_all(index, paths, flags, NULL, NULL), "git_index_add_all");
   bail_if(git_index_write(index), "git_index_write");
   git_strarray_free(paths);
   git_index_free(index);
@@ -134,7 +142,7 @@ static void extract_entry_data(const git_status_entry *file, char *status, char 
     } else if(s & GIT_STATUS_INDEX_DELETED){
       strcpy(status, "deleted");
     }
-  } else if(s & (GIT_STATUS_WT_DELETED | GIT_STATUS_WT_MODIFIED | GIT_STATUS_WT_NEW | GIT_STATUS_WT_RENAMED | GIT_STATUS_WT_TYPECHANGE)){
+  } else if(s & (GIT_STATUS_WT_DELETED | GIT_STATUS_WT_MODIFIED | GIT_STATUS_WT_NEW | GIT_STATUS_WT_RENAMED | GIT_STATUS_WT_TYPECHANGE | GIT_STATUS_CONFLICTED)){
     strcpy(filename, guess_filename(file->index_to_workdir));
     *isstaged = 0;
     if(s & GIT_STATUS_WT_NEW){
@@ -147,15 +155,21 @@ static void extract_entry_data(const git_status_entry *file, char *status, char 
       strcpy(status, "typechange");
     } else if(s & GIT_STATUS_WT_DELETED){
       strcpy(status, "deleted");
+    } else if(s &  GIT_STATUS_CONFLICTED){
+      strcpy(status, "conflicted");
     }
   }
 }
 
-SEXP R_git_status_list(SEXP ptr){
+SEXP R_git_status_list(SEXP ptr, SEXP show_staged){
   git_status_list *list = NULL;
   git_repository *repo = get_git_repository(ptr);
   git_status_options opts = GIT_STATUS_OPTIONS_INIT;
-  opts.show = GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
+  if(!Rf_length(show_staged) || Rf_asLogical(show_staged) == NA_LOGICAL){
+    opts.show = GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
+  } else {
+    opts.show = Rf_asLogical(show_staged) ? GIT_STATUS_SHOW_INDEX_ONLY : GIT_STATUS_SHOW_WORKDIR_ONLY;
+  }
   opts.flags = GIT_STATUS_OPT_INCLUDE_UNTRACKED |
     GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX |
     GIT_STATUS_OPT_SORT_CASE_SENSITIVELY;

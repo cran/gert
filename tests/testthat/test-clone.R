@@ -1,5 +1,3 @@
-context("cloning from remote")
-
 test_that("cloning repositories works", {
   skip_if_offline()
   path <- file.path(tempdir(), 'gert')
@@ -13,9 +11,17 @@ test_that("cloning repositories works", {
   expect_equal(info, info2)
   expect_is(git_ls(repo), 'data.frame')
   expect_is(git_log(repo = repo), 'data.frame')
+  heads <- git_remote_ls(repo = repo)
+  expect_is(heads, 'data.frame')
+  expect_equal(git_remote_info(repo = repo)$head, "refs/remotes/origin/master")
 
   # Test remotes
   remotes <- git_remote_list(repo)
   expect_equal(remotes$name, "origin")
   expect_equal(remotes$url, "https://github.com/r-lib/gert")
+
+  # Test archive
+  expect_equal(git_archive_zip(repo = repo), 'gert.zip')
+  expect_equal(zip::zip_list('gert.zip')$filename, git_ls(repo=repo)$path)
+  unlink('gert.zip')
 })

@@ -5,6 +5,10 @@
 #include <string.h>
 #include "utils.h"
 
+#ifndef GIT_ERROR_CALLBACK
+#define GIT_ERROR_CALLBACK GITERR_CALLBACK
+#endif
+
 #define print_if_verbose(...) print_log(verbose, __VA_ARGS__)
 
 typedef struct {
@@ -58,12 +62,13 @@ static char* get_password(SEXP cb, const char *url, const char **username, int f
   return strdup(CHAR(STRING_ELT(res, 1)));
 }
 
-static int get_key_files(SEXP cb, auth_key_data *out){
+static int get_key_files(SEXP cb, auth_key_data *out, int verbose){
   if(!Rf_isFunction(cb))
     Rf_error("cb must be a function");
   int err;
   SEXP call = PROTECT(Rf_lcons(cb, R_NilValue));
-  SEXP res = PROTECT(R_tryEval(call, R_GlobalEnv, &err));
+  SEXP res = PROTECT(verbose ? R_tryEval(call, R_GlobalEnv, &err) :
+                       R_tryEvalSilent(call, R_GlobalEnv, &err));
   if(err || !Rf_isString(res)){
     UNPROTECT(2);
     return -1;
@@ -157,6 +162,7 @@ static int auth_callback(git_cred **cred, const char *url, const char *username,
   auth_callback_data_t *cb_data = payload;
   const char * ssh_user = username ? username : "git";
   int verbose = cb_data->verbose;
+  char custom_callback_error[1000] = "Authentication failure";
 
 #if AT_LEAST_LIBGIT2(0, 20)
 
@@ -180,11 +186,13 @@ static int auth_callback(git_cred **cred, const char *url, const char *username,
     if(cb_data->retries == 1) {
       cb_data->retries++;
       auth_key_data key_data = {0};
-      if(!get_key_files(cb_data->getkey, &key_data) &&
+      if(!get_key_files(cb_data->getkey, &key_data, verbose) &&
          !git_cred_ssh_key_new(cred, ssh_user, key_data.pubkey_path,
                                key_data.key_path, key_data.pass_phrase)){
         print_if_verbose("Trying to authenticate '%s' using provided ssh-key...\n", ssh_user);
         return 0;
+      } else if(R_curErrorBuf()){
+        snprintf(custom_callback_error, 999, "SSH authentication failure: %s", R_curErrorBuf());
       }
     }
 
@@ -193,7 +201,7 @@ static int auth_callback(git_cred **cred, const char *url, const char *username,
       print_if_verbose("Failed to authenticate over SSH. You either need to provide a key or setup ssh-agent\n");
       if(strcmp(ssh_user, "git"))
         print_if_verbose("Are you sure ssh address has username '%s'? (ssh remotes usually have username 'git')\n", ssh_user);
-      return GIT_EUSER;
+      goto failure;
     }
   }
 
@@ -217,14 +225,16 @@ static int auth_callback(git_cred **cred, const char *url, const char *username,
       char *pass = get_password(cb_data->getcred, url, &username, cb_data->retries > 2);
       if(!username || !pass){
         print_if_verbose("Credential lookup failed\n");
-        return GIT_EUSER;
+        goto failure;
       } else {
         return git_cred_userpass_plaintext_new(cred, username, pass);
       }
     }
   }
   print_if_verbose("All authentication methods failed\n");
-  return GIT_EUSER;
+failure:
+  giterr_set_str(GIT_ERROR_CALLBACK, custom_callback_error);
+  return GIT_EAUTH;
 }
 
 static auth_callback_data_t auth_callback_data(SEXP getkey, SEXP getcred, int verbose){
@@ -343,7 +353,7 @@ static int update_cb(const char *refname, const git_oid *a, const git_oid *b, vo
   return 0;
 }
 
-SEXP R_git_remote_fetch(SEXP ptr, SEXP name, SEXP refspec, SEXP getkey, SEXP getcred, SEXP verbose){
+SEXP R_git_remote_fetch(SEXP ptr, SEXP name, SEXP refspec, SEXP getkey, SEXP getcred, SEXP prune, SEXP verbose){
   git_remote *remote = NULL;
   git_repository *repo = get_git_repository(ptr);
   if(git_remote_lookup(&remote, repo, CHAR(STRING_ELT(name, 0))) < 0){
@@ -353,6 +363,8 @@ SEXP R_git_remote_fetch(SEXP ptr, SEXP name, SEXP refspec, SEXP getkey, SEXP get
   git_strarray *rs = Rf_length(refspec) ? files_to_array(refspec) : NULL;
   git_fetch_options opts = GIT_FETCH_OPTIONS_INIT;
   opts.download_tags = GIT_REMOTE_DOWNLOAD_TAGS_ALL;
+  if(Rf_asLogical(prune))
+    opts.prune = GIT_FETCH_PRUNE;
   opts.update_fetchhead = 1;
   auth_callback_data_t data_cb = auth_callback_data(getkey, getcred, Rf_asLogical(verbose));
   opts.callbacks.payload = &data_cb;
@@ -388,7 +400,7 @@ SEXP R_git_remote_push(SEXP ptr, SEXP name, SEXP refspec, SEXP getkey, SEXP getc
     opts.callbacks.push_transfer_progress = print_progress;
     opts.callbacks.push_update_reference = remote_message;
   }
-  bail_if(git_remote_push(remote, rs, &opts), "git_remote_fetch");
+  bail_if(git_remote_push(remote, rs, &opts), "git_remote_push");
   git_remote_free(remote);
   return ptr;
 }
@@ -398,4 +410,69 @@ SEXP R_set_session_keyphrase(SEXP key){
     Rf_error("Need to pass a string");
   session_keyphrase(CHAR(STRING_ELT(key, 0)));
   return R_NilValue;
+}
+
+SEXP R_git_remote_ls(SEXP ptr, SEXP name, SEXP getkey, SEXP getcred, SEXP verbose){
+  git_remote *remote = NULL;
+  const char *remote_name = CHAR(STRING_ELT(name, 0));
+  git_repository *repo = get_git_repository(ptr);
+  if(git_remote_lookup(&remote, repo, remote_name) < 0){
+    remote_name = NULL;
+    if(git_remote_create_anonymous(&remote, repo, CHAR(STRING_ELT(name, 0))) < 0)
+      Rf_error("Remote must either be an existing remote or URL");
+  }
+  git_remote_callbacks callbacks = GIT_REMOTE_CALLBACKS_INIT;
+  auth_callback_data_t data_cb = auth_callback_data(getkey, getcred, Rf_asLogical(verbose));
+  callbacks.payload = &data_cb;
+  callbacks.credentials = auth_callback;
+
+  /* Also enables download progress and user interrupt */
+  if(Rf_asLogical(verbose)){
+    callbacks.update_tips = &update_cb;
+    callbacks.transfer_progress = fetch_progress;
+    callbacks.push_transfer_progress = print_progress;
+    callbacks.push_update_reference = remote_message;
+  }
+  bail_if(git_remote_connect(remote, GIT_DIRECTION_FETCH, &callbacks, NULL, NULL), "git_remote_connect");
+
+  /* We are connected */
+  size_t refs_len;
+  const git_remote_head **refs;
+  bail_if(git_remote_ls(&refs, &refs_len, remote), "git_remote_ls");
+
+  /* Store the default branch (remote HEAD) */
+  if (remote_name && refs_len && refs[0]->symref_target){
+    char head[1000] = {0};
+    char target[1000] = {0};
+    sprintf(head, "refs/remotes/%s/HEAD", git_remote_name(remote));
+    const char *symref = refs[0]->symref_target;
+    if(strncmp(symref, "refs/heads/", 11) == 0){
+      sprintf(target, "refs/remotes/%s/%s", git_remote_name(remote), symref + 11);
+    } else {
+      strcpy(target, symref);
+    }
+    git_object *revision = NULL;
+    if(git_revparse_single(&revision, repo, target) == GIT_OK){
+      git_object_free(revision);
+      git_reference *ref = NULL;
+      git_reference_symbolic_create(&ref, repo, head, target, 1, "Updated default branch!");
+      git_reference_free(ref);
+    } else {
+      REprintf("Remote default branch %s not found locally (fetch first)\n", target);
+    }
+  }
+
+  /* Collect references */
+  SEXP names = PROTECT(Rf_allocVector(STRSXP, refs_len));
+  SEXP oids = PROTECT(Rf_allocVector(STRSXP, refs_len));
+  SEXP syms = PROTECT(Rf_allocVector(STRSXP, refs_len));
+  for (int i = 0; i < refs_len; i++) {
+    char oid[GIT_OID_HEXSZ + 1] = {0};
+    git_oid_fmt(oid, &refs[i]->oid);
+    SET_STRING_ELT(names, i, safe_char(refs[i]->name));
+    SET_STRING_ELT(oids, i, safe_char(oid));
+    SET_STRING_ELT(syms, i, safe_char(refs[i]->symref_target));
+  }
+  git_remote_free(remote);
+  return build_tibble(3, "ref", names, "symref", syms, "oid", oids);
 }

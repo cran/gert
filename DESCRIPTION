@@ -1,26 +1,37 @@
-Package: gert
 Type: Package
+Package: gert
 Title: Simple Git Client for R
-Version: 0.3
-Author: Jeroen Ooms
-Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
-Description: Simple git client based on 'libgit2' with user-friendly authentication
-    and support for both SSH and HTTPS remotes on all platforms. User credentials
-    are shared with command line 'git' through the git-credential store and ssh keys
-    stored on disk or ssh-agent. On Linux, a somewhat recent  version of 'libgit2' is
-    required.
+Version: 1.0.0
+Authors@R: c(
+    person("Jeroen", "Ooms", role = c("aut", "cre"), email = "jeroen@berkeley.edu",
+      comment = c(ORCID = "0000-0002-4035-0289")),
+    person("Jennifer", "Bryan", role = "ctb", email = "jenny@rstudio.com",
+      comment = c(ORCID = "0000-0002-6983-2759")))
+Description: Simple git client for R based on 'libgit2' with support for SSH and 
+    HTTPS remotes. All functions in 'gert' use basic R data types (such as vectors
+    and data-frames) for their arguments and return values. User credentials are
+    shared with command line 'git' through the git-credential store and ssh keys
+    stored on disk or ssh-agent. On Linux, a somewhat recent version of 'libgit2'
+    is required; we provide a 'PPA' for older Ubuntu 'LTS' versions. 
 License: MIT + file LICENSE
-SystemRequirements: libgit2 (>= 0.26): libgit2-devel (rpm) or
-        libgit2-dev (deb)
-URL: https://jeroen.cran.dev/gert (website),
-        httsp://github.com/r-lib/gert (devel), https://libgit2.org
+URL: https://docs.ropensci.org/gert/ (website),
+        https://github.com/r-lib/gert (devel), https://libgit2.org
         (upstream)
-BugReports: http://github.com/r-lib/gert/issues
+BugReports: https://github.com/r-lib/gert/issues
+Imports: askpass, credentials (>= 1.2.1), openssl (>= 1.4.1),
+        rstudioapi (>= 0.11), zip (>= 2.1.0)
+Suggests: spelling, knitr, rmarkdown, testthat
+VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 6.1.1
-Imports: openssl (>= 1.4.1), credentials (>= 1.0), askpass
-Suggests: testthat
+RoxygenNote: 7.1.1
+SystemRequirements: libgit2 (>= 0.26): libgit2-devel (rpm) or
+        libgit2-dev (deb). A PPA is available for older Ubuntu LTS
+        versions.
+Language: en-US
 NeedsCompilation: yes
-Packaged: 2019-10-29 11:54:36 UTC; jeroen
+Packaged: 2020-10-07 12:56:46 UTC; jeroen
+Author: Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),
+  Jennifer Bryan [ctb] (<https://orcid.org/0000-0002-6983-2759>)
+Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
 Repository: CRAN
-Date/Publication: 2019-10-29 13:00:02 UTC
+Date/Publication: 2020-10-07 22:50:08 UTC

@@ -1,3 +1,14 @@
+1.0
+  - Lots of new functions
+  - Windows and MacOS now ship with libgit2-1.0.0
+  - Do not advertise HTTPS support in startup message because it should
+    always be supported.
+  - Config setters return previous value invisibly (#37)
+  - Conflicted files are reported by git_status() (#40)
+  - Windows: libgit2 now finds ~/.gitconfig under $USERPROFILE (instead of Documents)
+  - A git_signature object is now stored as a string instead of an externalptr
+  - The 'name' parameter in git_remote_ functions has been renamed to 'remote'
+
 0.3
   - Support for clone --mirror and push --mirror (#12)
 

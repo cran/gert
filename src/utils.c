@@ -3,11 +3,15 @@
 void bail_if(int err, const char *what){
   if (err) {
     const git_error *info = giterr_last();
-    if (info){
-      Rf_error("libgit2 error in %s: %s (%d)\n", what, info->message, info->klass);
-    } else {
-      Rf_error("Unknown libgit2 error in %s", what);
-    }
+    SEXP code = PROTECT(Rf_ScalarInteger(err));
+    SEXP kclass = PROTECT(Rf_ScalarInteger(info ? info->klass : NA_INTEGER));
+    SEXP message = PROTECT(safe_string(info ? info->message : "Unknown error message"));
+    SEXP wheregit = PROTECT(safe_string(what));
+    SEXP expr = PROTECT(Rf_install("raise_libgit2_error"));
+    SEXP call = PROTECT(Rf_lang5(expr, code, message, wheregit, kclass));
+    Rf_eval(call, R_FindNamespace(Rf_mkString("gert")));
+    UNPROTECT(6);
+    Rf_error("Failed to raise gert S3 error (%s)", info->message);
   }
 }
 
@@ -23,8 +27,54 @@ void bail_if_null(void * ptr, const char * what){
     bail_if(-1, what);
 }
 
+#ifndef GIT_OBJECT_COMMIT
+#define GIT_OBJECT_COMMIT GIT_OBJ_COMMIT
+#endif
+
+git_object * resolve_refish(SEXP string, git_repository *repo){
+  if(!Rf_isString(string) || !Rf_length(string))
+    Rf_error("Reference is not a string");
+  const char *str = CHAR(STRING_ELT(string, 0));
+  git_reference *ref = NULL;
+  git_object *obj = NULL;
+  if(git_reference_dwim(&ref, repo, str) == GIT_OK){
+    if(git_reference_peel(&obj, ref, GIT_OBJECT_COMMIT) == GIT_OK){
+      git_reference_free(ref);
+      return obj;
+    }
+  }
+  if(git_revparse_single(&obj, repo, str) == GIT_OK){
+    if(git_object_type(obj) == GIT_OBJECT_COMMIT)
+      return obj;
+    git_object *peeled = NULL;
+    if(git_object_peel(&peeled, obj, GIT_OBJECT_COMMIT) == GIT_OK){
+      git_object_free(obj);
+      return peeled;
+    }
+    const char *type = git_object_type2string(git_object_type(obj));
+    git_object_free(obj);
+    Rf_error("Reference is a %s and does not point to a commit: %s", type, str);
+  } else {
+    Rf_error("Failed to find git reference '%s'", str);
+  }
+}
+
+git_commit *ref_to_commit(SEXP ref, git_repository *repo){
+  git_commit *commit = NULL;
+  git_object *revision = resolve_refish(ref, repo);
+  bail_if(git_commit_lookup(&commit, repo, git_object_id(revision)), "git_commit_lookup");
+  git_object_free(revision);
+  return commit;
+}
+
 SEXP safe_string(const char *x){
   return Rf_ScalarString(safe_char(x));
+}
+
+SEXP string_or_null(const char *x){
+  if(x == NULL)
+    return R_NilValue;
+  return Rf_mkString(x);
 }
 
 SEXP safe_char(const char *x){
@@ -72,4 +122,19 @@ SEXP list_to_tibble(SEXP df){
   Rf_setAttrib(df, R_ClassSymbol, make_strvec(3, "tbl_df", "tbl", "data.frame"));
   UNPROTECT(2);
   return df;
+}
+
+static int checkout_notify_cb(git_checkout_notify_t why, const char *path, const git_diff_file *baseline,
+                              const git_diff_file *target, const git_diff_file *workdir, void *payload){
+  //git_checkout_options *opts = payload;
+  if(why == GIT_CHECKOUT_NOTIFY_CONFLICT){
+    Rf_warningcall_immediate(R_NilValue, "Your local changes to the following file would be overwritten by checkout: %s\nUse force = TRUE to checkout anyway.", path);
+  }
+  return 0;
+}
+
+void set_checkout_notify_cb(git_checkout_options *opts){
+  opts->notify_cb = checkout_notify_cb;
+  opts->notify_flags = GIT_CHECKOUT_NOTIFY_CONFLICT;
+  opts->notify_payload = opts;
 }

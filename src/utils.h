@@ -4,12 +4,15 @@
 void warn_last_msg();
 void bail_if(int err, const char *what);
 void bail_if_null(void * ptr, const char * what);
+SEXP string_or_null(const char *x);
 SEXP safe_string(const char *x);
 SEXP safe_char(const char *x);
 SEXP make_strvec(int n, ...);
 SEXP build_list(int n, ...);
 SEXP list_to_tibble(SEXP df);
 git_repository *get_git_repository(SEXP ptr);
+git_object *resolve_refish(SEXP string, git_repository *repo);
+git_commit *ref_to_commit(SEXP ref, git_repository *repo);
 
 #define build_tibble(...) list_to_tibble(build_list( __VA_ARGS__))
 
@@ -19,3 +22,10 @@ git_repository *get_git_repository(SEXP ptr);
 #if !AT_LEAST_LIBGIT2(0, 22)
 #define git_remote_lookup(a,b,c) git_remote_load(a,b,c)
 #endif
+
+#if ! AT_LEAST_LIBGIT2(0, 21)
+#define git_checkout_options git_checkout_opts
+#define GIT_CHECKOUT_OPTIONS_INIT GIT_CHECKOUT_OPTS_INIT
+#endif
+
+void set_checkout_notify_cb(git_checkout_options *opts);
