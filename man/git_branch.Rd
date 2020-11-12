@@ -13,7 +13,7 @@
 \usage{
 git_branch(repo = ".")
 
-git_branch_list(repo = ".")
+git_branch_list(local = NULL, repo = ".")
 
 git_branch_checkout(branch, force = FALSE, repo = ".")
 
@@ -30,7 +30,12 @@ git_branch_exists(branch, local = TRUE, repo = ".")
 \arguments{
 \item{repo}{The path to the git repository. If the directory is not a
 repository, parent directories are considered (see \link{git_find}). To disable
-this search, provide the filepath protected with \code{\link[=I]{I()}}.}
+this search, provide the filepath protected with \code{\link[=I]{I()}}. When using this
+parameter, always explicitly call by name (i.e. \verb{repo = }) because future
+versions of gert may have additional parameters.}
+
+\item{local}{set TRUE to only check for local branches, FALSE to check for remote
+branches. Use NULL to return all branches.}
 
 \item{branch}{name of branch to check out}
 
@@ -41,8 +46,6 @@ this search, provide the filepath protected with \code{\link[=I]{I()}}.}
 \item{checkout}{move HEAD to the newly created branch}
 
 \item{upstream}{remote branch from \link{git_branch_list}, for example \code{"origin/master"}}
-
-\item{local}{set FALSE to check for remote branch names.}
 }
 \description{
 Create, list, and checkout branches.

@@ -1,4 +1,9 @@
-1.1.0
+1.0.2
+  - git_branch_list() gains a parameter 'local'
+  - Windows / MacOS: update to libgit2 1.1.0
+  - Do not use bash in configure
+
+1.0.1
   - git_branch_list() and git_commit_info() gain a date field
   - Bug fixes
 
