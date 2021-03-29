@@ -49,7 +49,7 @@ extern SEXP R_git_repository_add(SEXP, SEXP, SEXP);
 extern SEXP R_git_repository_clone(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_repository_find(SEXP);
 extern SEXP R_git_repository_info(SEXP);
-extern SEXP R_git_repository_init(SEXP);
+extern SEXP R_git_repository_init(SEXP, SEXP);
 extern SEXP R_git_repository_ls(SEXP);
 extern SEXP R_git_repository_open(SEXP, SEXP);
 extern SEXP R_git_repository_path(SEXP);
@@ -119,7 +119,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"R_git_repository_clone",    (DL_FUNC) &R_git_repository_clone,    8},
   {"R_git_repository_find",     (DL_FUNC) &R_git_repository_find,     1},
   {"R_git_repository_info",     (DL_FUNC) &R_git_repository_info,     1},
-  {"R_git_repository_init",     (DL_FUNC) &R_git_repository_init,     1},
+  {"R_git_repository_init",     (DL_FUNC) &R_git_repository_init,     2},
   {"R_git_repository_ls",       (DL_FUNC) &R_git_repository_ls,       1},
   {"R_git_repository_open",     (DL_FUNC) &R_git_repository_open,     2},
   {"R_git_repository_path",     (DL_FUNC) &R_git_repository_path,     1},
@@ -154,8 +154,12 @@ attribute_visible void R_init_gert(DllInfo *dll) {
   git_libgit2_init();
 #ifdef _WIN32
   const char *userprofile = getenv("USERPROFILE");
-  if(userprofile)
-    git_libgit2_opts(GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, userprofile);
+  if(userprofile){
+    /* Need to convert to UTF-8 for libgit2 */
+    SEXP home = PROTECT(Rf_mkChar(userprofile));
+    git_libgit2_opts(GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, Rf_translateCharUTF8(home));
+    UNPROTECT(1);
+  }
 #endif
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
