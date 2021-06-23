@@ -1,7 +1,7 @@
-db4e412ffc57d3ed976b0d2b69130012 *DESCRIPTION
+a5737a6ddaf3772116517368d618a21c *DESCRIPTION
 f35c1dd7a6e913e967bd6e03dd8a3c18 *LICENSE
 626656f5c7c04d38af12945b93b32278 *NAMESPACE
-5ea10293b1de1a5848b0083dbfaf8bb1 *NEWS
+a2a78b619f2b8d245e1d36723920db70 *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 e555bec3a4a2f3526fe9ed3cef8d49c2 *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -11,7 +11,7 @@ dc8fc2588a84064d9a117b97b6fb2b37 *R/config.R
 2ce82b120070c97a6e3c839eeccd3c6e *R/diff.R
 dbd57a3e18ba2791e5866fe1b7ae263d *R/errors.R
 3e31173e66269a3f20cb2deab3d29bfb *R/fetch.R
-fa47b579b83f9738ae90adfa679dd41d *R/init.R
+40503d6f196521a87911b729369eaa42 *R/init.R
 c70d847ba33d399c9a6e03a597eb2d7b *R/merge.R
 c9c8d05f544dd43915034a577c480932 *R/open.R
 1e0fa65c141a1f01269f86ddd40c22eb *R/pr.R
@@ -22,13 +22,13 @@ fb7a07a86113a58f87af9ba34e732e41 *R/remotes.R
 e895aa747fdeddaa082978585af007fa *R/stash.R
 688c43d1c458ca3a6915d8c30b7010a7 *R/submodules.R
 d70263783b0f004476b3d678e6ca1137 *R/tag.R
-fd233b626e10ac00840330ccbcded099 *build/vignette.rds
+51e398120837e6fcc4a07480ab39fa57 *build/vignette.rds
 4ce1fcf8d4a4b68aac58e1c00c2db6d0 *cleanup
 870d2959881374188f71e55b3f847b01 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 bcb0e194e0e4c187af8d35a82408f2db *inst/doc/gert.R
 9ed512a5a866e3de8fac3f01e9302a97 *inst/doc/gert.Rmd
-8d289adcf9c6776d06067a3b63293800 *inst/doc/gert.html
+30626738a6dcef49d48b4f26bb5fdd1c *inst/doc/gert.html
 b6b1c714f39c91966ee6484480b82270 *man/git_archive.Rd
 03a45fc6ea8f530c9d83e6558e3f0904 *man/git_branch.Rd
 d499eee663fdee71ca4260225e5aa68b *man/git_commit.Rd
@@ -48,9 +48,10 @@ b181d20a2f1cee354e800b11b149fa43 *man/git_stash.Rd
 f35700959ac9fbde3eaca070bfb35ffd *man/libgit2_config.Rd
 f324ff154fa12be8c82412e0118e4fe0 *man/user_is_configured.Rd
 b65209d367b8be40998431ba9298d441 *src/Makevars.in
-914fe6c328ea3b00657837acd794088d *src/Makevars.win
+2cec33791efd347cbcb051402d7cf9c4 *src/Makevars.ucrt
+4e3fccc10ce5f0a93e738acb1831250e *src/Makevars.win
 cb1440a592d1198b63b476bee86ca7ac *src/branch.c
-adeffb3f54d7b1ff1dd438de63007465 *src/clone.c
+505a00ec19a16cb491e56c759f215005 *src/clone.c
 120108c5e834907f426bd5d000da8e6d *src/commit.c
 72eee1bf384a25c9867fedb2fadbac70 *src/config.c
 d8b6e2d68d87c0b21bb00207573eb6ad *src/conflicts.c
