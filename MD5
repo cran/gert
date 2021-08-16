@@ -1,7 +1,7 @@
-a5737a6ddaf3772116517368d618a21c *DESCRIPTION
+e12deda6af07e026d406cc84d7470289 *DESCRIPTION
 f35c1dd7a6e913e967bd6e03dd8a3c18 *LICENSE
 626656f5c7c04d38af12945b93b32278 *NAMESPACE
-a2a78b619f2b8d245e1d36723920db70 *NEWS
+4e3c9a2896bb693134955e062ee20fad *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 e555bec3a4a2f3526fe9ed3cef8d49c2 *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -22,13 +22,13 @@ fb7a07a86113a58f87af9ba34e732e41 *R/remotes.R
 e895aa747fdeddaa082978585af007fa *R/stash.R
 688c43d1c458ca3a6915d8c30b7010a7 *R/submodules.R
 d70263783b0f004476b3d678e6ca1137 *R/tag.R
-51e398120837e6fcc4a07480ab39fa57 *build/vignette.rds
+c3b068280118513b5c8e0606a94ce40d *build/vignette.rds
 4ce1fcf8d4a4b68aac58e1c00c2db6d0 *cleanup
 870d2959881374188f71e55b3f847b01 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 bcb0e194e0e4c187af8d35a82408f2db *inst/doc/gert.R
 9ed512a5a866e3de8fac3f01e9302a97 *inst/doc/gert.Rmd
-30626738a6dcef49d48b4f26bb5fdd1c *inst/doc/gert.html
+49b7be21ff20bf41a9471fd5bb792f05 *inst/doc/gert.html
 b6b1c714f39c91966ee6484480b82270 *man/git_archive.Rd
 03a45fc6ea8f530c9d83e6558e3f0904 *man/git_branch.Rd
 d499eee663fdee71ca4260225e5aa68b *man/git_commit.Rd
@@ -71,7 +71,7 @@ c05722d552f1a2692685bec349a0eff7 *tests/libgit2.Rout.save
 3e9926c634ae92d0233fc7cff669d9ad *tests/testthat.R
 fdc850d5c179f938d90d2907147f24ee *tests/testthat/key.pem
 379ed8c22a2dba1b2a98723da8f1f2be *tests/testthat/pat.bin
-5234b8e2453e1691b4a976048d8b366c *tests/testthat/test-auth.R
+253d46f0cbb1d70af3f1ff74739a702d *tests/testthat/test-auth.R
 7c689cef3305aa024c733c41b7b575cf *tests/testthat/test-clone.R
 fd68e961463ac5b5e041e285a1d19a43 *tests/testthat/test-commit.R
 fd78658779f7a91a06346cae6c536e56 *tests/testthat/test-config.R
