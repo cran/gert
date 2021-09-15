@@ -26,12 +26,18 @@ git_branch_list <- function(local = NULL, repo = '.'){
 #' @rdname git_branch
 #' @param branch name of branch to check out
 #' @param force ignore conflicts and overwrite modified files
-#' @useDynLib gert R_git_checkout_branch
-git_branch_checkout <- function(branch, force = FALSE, repo = '.'){
+#' @param orphan if branch does not exist, checkout unborn branch
+#' @useDynLib gert R_git_checkout_branch R_git_checkout_unborn
+git_branch_checkout <- function(branch, force = FALSE, orphan = FALSE, repo = '.'){
   repo <- git_open(repo)
   branch <- as.character(branch)
   force <- as.logical(force)
   if(!git_branch_exists(branch, repo = repo)){
+    if(isTRUE(orphan)){
+      ref <- paste0('refs/heads/', branch)
+      .Call(R_git_checkout_unborn, repo, ref)
+      return(ref)
+    }
     all_branches <- subset(git_branch_list(repo = repo), local == FALSE)$name
     candidate <- sub("^[^/]+/", "", all_branches) == branch
     if(sum(candidate) > 1){
@@ -67,6 +73,18 @@ git_branch_delete <- function(branch, repo = '.'){
   repo <- git_open(repo)
   branch <- as.character(branch)
   .Call(R_git_delete_branch, repo, branch)
+  git_repo_path(repo)
+}
+
+#' @export
+#' @rdname git_branch
+#' @useDynLib gert R_git_branch_move
+#' @param new_branch target name of the branch once the move is performed; this name is validated for consistency.
+git_branch_move <- function(branch, new_branch, force = FALSE, repo = '.'){
+  repo <- git_open(repo)
+  branch <- as.character(branch)
+  new_branch <- as.character(new_branch)
+  .Call(R_git_branch_move, repo, branch, new_branch, as.logical(force))
   git_repo_path(repo)
 }
 

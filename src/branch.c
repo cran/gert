@@ -71,6 +71,18 @@ SEXP R_git_create_branch(SEXP ptr, SEXP name, SEXP ref, SEXP checkout){
   return out;
 }
 
+SEXP R_git_branch_move(SEXP ptr, SEXP branch, SEXP new_branch, SEXP force){
+  git_reference *ref;
+  git_repository *repo = get_git_repository(ptr);
+  bail_if(git_branch_lookup(&ref, repo, CHAR(STRING_ELT(branch, 0)), GIT_BRANCH_LOCAL), "git_branch_lookup");
+  git_reference *out;
+  bail_if(git_branch_move(&out, ref, CHAR(STRING_ELT(new_branch, 0)), Rf_asInteger(force)), "git_branch_move");
+  git_reference_free(ref);
+  SEXP res = Rf_mkString(git_reference_name(out));
+  git_reference_free(out);
+  return res;
+}
+
 SEXP R_git_delete_branch(SEXP ptr, SEXP branch){
   git_reference *ref;
   git_repository *repo = get_git_repository(ptr);
@@ -95,6 +107,12 @@ SEXP R_git_checkout_branch(SEXP ptr, SEXP branch, SEXP force){
   bail_if(git_checkout_tree(repo, obj, &opts), "git_checkout_tree");
   bail_if(git_repository_set_head(repo, git_reference_name(ref)), "git_repository_set_head");
   git_reference_free(ref);
+  return ptr;
+}
+
+SEXP R_git_checkout_unborn(SEXP ptr, SEXP ref){
+  git_repository *repo = get_git_repository(ptr);
+  bail_if(git_repository_set_head(repo, CHAR(STRING_ELT(ref, 0))), "git_repository_set_head");
   return ptr;
 }
 
@@ -145,10 +163,14 @@ SEXP R_git_branch_list(SEXP ptr, SEXP local){
       SET_STRING_ELT(names, i, safe_char(name));
     LOGICAL(islocal)[i] = (type == GIT_BRANCH_LOCAL);
     SET_STRING_ELT(refs, i, safe_char(git_reference_name(ref)));
-    if(git_reference_target(ref) && !git_commit_lookup(&commit, repo, git_reference_target(ref))){
-      SET_STRING_ELT(ids, i, safe_char(git_oid_tostr_s(git_commit_id(commit))));
-      REAL(times)[i] = git_commit_time(commit);
-      git_commit_free(commit);
+    git_object *obj = NULL;
+    if(git_reference_peel(&obj, ref, GIT_OBJECT_COMMIT) == GIT_OK){
+      if(git_commit_lookup(&commit, repo, git_object_id(obj)) == GIT_OK){
+        SET_STRING_ELT(ids, i, safe_char(git_oid_tostr_s(git_commit_id(commit))));
+        REAL(times)[i] = git_commit_time(commit);
+        git_commit_free(commit);
+      }
+      git_object_free(obj);
     }
     git_reference *upstream = NULL;
     SET_STRING_ELT(upstreams, i, safe_char(git_branch_upstream(&upstream, ref) ? NULL : git_reference_name(upstream)));
