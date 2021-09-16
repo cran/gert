@@ -1,7 +1,7 @@
-4f8d817a2029edcdbcd0868217a375fe *DESCRIPTION
+27adc3d84fc75c5e998459474a495b9f *DESCRIPTION
 f35c1dd7a6e913e967bd6e03dd8a3c18 *LICENSE
 8dbd97105ed55d2e28d0682cea0ba7f1 *NAMESPACE
-ff2742d22a42909c84ec8399e9712900 *NEWS
+a9e73a4aaf12f9ad53ac1fb1c02ac1d8 *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 a573ea473b9704d024dced7d47a4dc1f *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -24,11 +24,11 @@ e895aa747fdeddaa082978585af007fa *R/stash.R
 d70263783b0f004476b3d678e6ca1137 *R/tag.R
 c3b068280118513b5c8e0606a94ce40d *build/vignette.rds
 4ce1fcf8d4a4b68aac58e1c00c2db6d0 *cleanup
-870d2959881374188f71e55b3f847b01 *configure
+a6c29a8be799dcf5c8555bc38fa3d60d *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 bcb0e194e0e4c187af8d35a82408f2db *inst/doc/gert.R
 9ed512a5a866e3de8fac3f01e9302a97 *inst/doc/gert.Rmd
-2efc6ad5ea32ee5d6fa57e0e437af7d4 *inst/doc/gert.html
+5472627b500057a77e8f0d8cf60a0e03 *inst/doc/gert.html
 b6b1c714f39c91966ee6484480b82270 *man/git_archive.Rd
 db2d4eda8de04d3186b1d5088d17dcbd *man/git_branch.Rd
 79a01bf77f53d8a53d143207f0c235dd *man/git_commit.Rd
@@ -62,8 +62,8 @@ c8750cc2dadd74c9a069167ccba8cec1 *src/init.c
 db4af265cf7d3cf87936991a14f75e9c *src/stash.c
 cf94de1009669881ed00dbb39a928e97 *src/submodules.c
 7ba4124bc94f0adbf42d4629668b496c *src/tag.c
-44dbcdf874912bdc6c8cd162d2e39ba3 *src/utils.c
-886a05a8e7bbac4a1a3791651d308f22 *src/utils.h
+7cf5ff13e7f0c743e08c75d06184598f *src/utils.c
+d343cd60db753718c291c56958ea7501 *src/utils.h
 cfdc37fb96a4e35f31c6caec44f0973e *src/version.c
 1e4e465531264929e4c82075d5d97d53 *tests/libgit2.R
 c05722d552f1a2692685bec349a0eff7 *tests/libgit2.Rout.save
