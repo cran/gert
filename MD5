@@ -1,7 +1,7 @@
-b7ecac2bb4200a7f6b075c9d32d79836 *DESCRIPTION
+46590ca3c9601f3a4205578231da3aa7 *DESCRIPTION
 f35c1dd7a6e913e967bd6e03dd8a3c18 *LICENSE
 8dbd97105ed55d2e28d0682cea0ba7f1 *NAMESPACE
-2a1e29f822ec207ee5dca76cec927072 *NEWS
+f39f93bae758e225cd68b8c179021c7a *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 a573ea473b9704d024dced7d47a4dc1f *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -28,7 +28,7 @@ a6c29a8be799dcf5c8555bc38fa3d60d *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 bcb0e194e0e4c187af8d35a82408f2db *inst/doc/gert.R
 9ed512a5a866e3de8fac3f01e9302a97 *inst/doc/gert.Rmd
-ea95dd097b83cb2b339150174602b399 *inst/doc/gert.html
+3d542bdc14c1b342c7a20acde7e83d56 *inst/doc/gert.html
 b6b1c714f39c91966ee6484480b82270 *man/git_archive.Rd
 db2d4eda8de04d3186b1d5088d17dcbd *man/git_branch.Rd
 79a01bf77f53d8a53d143207f0c235dd *man/git_commit.Rd
@@ -52,11 +52,11 @@ b65209d367b8be40998431ba9298d441 *src/Makevars.in
 418e66ef5e0717ebb6c99fed98485027 *src/Makevars.win
 c4841036f5a472f85133e58b33269073 *src/branch.c
 505a00ec19a16cb491e56c759f215005 *src/clone.c
-120108c5e834907f426bd5d000da8e6d *src/commit.c
+fcd12ac8bea519b208ff5ecae2da0855 *src/commit.c
 72eee1bf384a25c9867fedb2fadbac70 *src/config.c
 d8b6e2d68d87c0b21bb00207573eb6ad *src/conflicts.c
 e6e1bb9975030f5d43b100dbabdd3516 *src/files.c
-c8750cc2dadd74c9a069167ccba8cec1 *src/init.c
+a3ac33694217248bc37984e967e192d0 *src/init.c
 0a0d6c09590bc610399385a11cc159af *src/merge.c
 76852b39b51cd1a87bfc0b22d088a8ed *src/rebase.c
 db4af265cf7d3cf87936991a14f75e9c *src/stash.c
