@@ -153,10 +153,12 @@ git_rm <- function(files, repo = '.'){
 #' @useDynLib gert R_git_status_list
 #' @param staged return only staged (TRUE) or unstaged files (FALSE).
 #' Use `NULL` or `NA` to show both (default).
-git_status <- function(staged = NULL, repo = '.'){
+#' @param pathspec character vector with paths to match
+git_status <- function(staged = NULL, pathspec = NULL, repo = '.'){
   repo <- git_open(repo)
   staged <- as.logical(staged)
-  df <- .Call(R_git_status_list, repo, staged)
+  pathspec <- as.character(pathspec)
+  df <- .Call(R_git_status_list, repo, staged, pathspec)
   df[order(df$file), ,drop = FALSE]
 }
 
@@ -171,9 +173,12 @@ git_conflicts <- function(repo = '.'){
 #' @export
 #' @rdname git_commit
 #' @useDynLib gert R_git_repository_ls
-git_ls <- function(repo = '.'){
+git_ls <- function(repo = '.', ref = NULL){
   repo <- git_open(repo)
-  .Call(R_git_repository_ls, repo)
+  if(!length(ref) && isTRUE(git_info(repo = repo)$bare)){
+    ref <- 'HEAD'
+  }
+  .Call(R_git_repository_ls, repo, ref = ref)
 }
 
 #' @export

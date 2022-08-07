@@ -64,10 +64,23 @@ SEXP R_git_repository_path(SEXP ptr){
   );
 }
 
-SEXP R_git_repository_ls(SEXP ptr){
+SEXP R_git_repository_ls(SEXP ptr, SEXP ref){
   git_index *index = NULL;
   git_repository *repo = get_git_repository(ptr);
-  bail_if(git_repository_index(&index, repo), "git_repository_index");
+  if(Rf_length(ref) && Rf_isString(ref)){
+    git_object *revision = resolve_refish(ref, repo);
+    git_commit *commit = NULL;
+    git_tree *tree = NULL;
+    bail_if(git_commit_lookup(&commit, repo, git_object_id(revision)), "git_commit_lookup");
+    git_object_free(revision);
+    bail_if(git_commit_tree(&tree, commit), "git_commit_tree");
+    bail_if(git_index_new(&index), "git_index_new");
+    bail_if(git_index_read_tree(index, tree), "git_index_read_tree");
+    git_commit_free(commit);
+    git_tree_free(tree);
+  } else {
+    bail_if(git_repository_index(&index, repo), "git_repository_index");
+  }
 
   size_t entry_count = git_index_entrycount(index);
   SEXP paths = PROTECT(Rf_allocVector(STRSXP, entry_count));
@@ -75,12 +88,13 @@ SEXP R_git_repository_ls(SEXP ptr){
   SEXP mtimes = PROTECT(Rf_allocVector(REALSXP, entry_count));
   SEXP ctimes = PROTECT(Rf_allocVector(REALSXP, entry_count));
 
+  int isbare = git_repository_is_bare(repo);
   for(size_t i = 0; i < entry_count; i++){
     const git_index_entry *entry = git_index_get_byindex(index, i);
     SET_STRING_ELT(paths, i, safe_char(entry->path));
-    REAL(sizes)[i] = (double) entry->file_size;
-    REAL(mtimes)[i] = (double) entry->mtime.seconds + entry->mtime.nanoseconds * 1e-9;
-    REAL(ctimes)[i] = (double) entry->ctime.seconds + entry->ctime.nanoseconds * 1e-9;
+    REAL(sizes)[i] = isbare ? NA_REAL : (double) entry->file_size;
+    REAL(mtimes)[i] = isbare ? NA_REAL : (double) entry->mtime.seconds + entry->mtime.nanoseconds * 1e-9;
+    REAL(ctimes)[i] = isbare ? NA_REAL : (double) entry->ctime.seconds + entry->ctime.nanoseconds * 1e-9;
   }
   git_index_free(index);
   Rf_setAttrib(mtimes, R_ClassSymbol, make_strvec(2, "POSIXct", "POSIXt"));
@@ -165,7 +179,7 @@ static void extract_entry_data(const git_status_entry *file, char *status, char 
   }
 }
 
-SEXP R_git_status_list(SEXP ptr, SEXP show_staged){
+SEXP R_git_status_list(SEXP ptr, SEXP show_staged, SEXP path_spec){
   git_status_list *list = NULL;
   git_repository *repo = get_git_repository(ptr);
   git_status_options opts = GIT_STATUS_OPTIONS_INIT;
@@ -173,6 +187,11 @@ SEXP R_git_status_list(SEXP ptr, SEXP show_staged){
     opts.show = GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
   } else {
     opts.show = Rf_asLogical(show_staged) ? GIT_STATUS_SHOW_INDEX_ONLY : GIT_STATUS_SHOW_WORKDIR_ONLY;
+  }
+  if(Rf_length(path_spec)){
+    git_strarray *pathspec = files_to_array(path_spec);
+    git_strarray_copy(&opts.pathspec, pathspec);
+    git_strarray_free(pathspec);
   }
   opts.flags = GIT_STATUS_OPT_INCLUDE_UNTRACKED |
     GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX |
