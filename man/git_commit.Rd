@@ -5,6 +5,7 @@
 \alias{git_commit_all}
 \alias{git_commit_info}
 \alias{git_commit_id}
+\alias{git_commit_stats}
 \alias{git_commit_descendant_of}
 \alias{git_add}
 \alias{git_rm}
@@ -22,6 +23,8 @@ git_commit_all(message, author = NULL, committer = NULL, repo = ".")
 git_commit_info(ref = "HEAD", repo = ".")
 
 git_commit_id(ref = "HEAD", repo = ".")
+
+git_commit_stats(ref = "HEAD", repo = ".")
 
 git_commit_descendant_of(ancestor, ref = "HEAD", repo = ".")
 
@@ -132,6 +135,7 @@ Other git:
 \code{\link{git_config}()},
 \code{\link{git_diff}()},
 \code{\link{git_fetch}()},
+\code{\link{git_ignore}},
 \code{\link{git_merge}()},
 \code{\link{git_rebase}()},
 \code{\link{git_remote}},

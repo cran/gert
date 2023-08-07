@@ -5,6 +5,11 @@ knitr::opts_chunk$set(
   error = TRUE
 )
 
+if (identical(Sys.getenv("IN_PKGDOWN"), "true") &&
+    !gert:::global_user_is_configured()) {
+  gert:::configure_global_user()
+}
+
 ## ----setup--------------------------------------------------------------------
 library(gert)
 
