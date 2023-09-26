@@ -2,8 +2,10 @@
 #define _GNU_SOURCE 1
 #endif
 
-#if defined(__sun)
-#define SKIP_CERTIFICATE_CHECK
+/* Beginning in libgit2 v1.4.5 and v1.5.1, libgit2 will now perform host key checking by default.
+ * However on Windows libssh does not have access to the cert store */
+#if defined(_WIN32)
+#define SKIP_HOSTKEY_CHECK
 #endif
 
 #include <string.h>
@@ -100,12 +102,14 @@ static void fin_git_repository(SEXP ptr){
   R_ClearExternalPtr(ptr);
 }
 
-#ifdef SKIP_CERTIFICATE_CHECK
-static int no_verify_cert(struct git_cert *cert, int valid, const char *host, void *payload){
-  return 0;
+#ifdef SKIP_HOSTKEY_CHECK
+static int skip_hostkey_check(struct git_cert *cert, int valid, const char *host, void *payload){
+  if(cert->cert_type == GIT_CERT_HOSTKEY_LIBSSH2)
+    return 0;
+  return valid;
 }
 void set_verify_handler(git_remote_callbacks *callbacks){
-  callbacks->certificate_check = no_verify_cert;
+  callbacks->certificate_check = skip_hostkey_check;
 }
 #else
 #define set_verify_handler(x)
@@ -256,6 +260,9 @@ static git_strarray *files_to_array(SEXP files){
 SEXP R_git_repository_init(SEXP path, SEXP is_bare){
   git_repository *repo = NULL;
   bail_if(git_repository_init(&repo, CHAR(STRING_ELT(path, 0)), Rf_asLogical(is_bare)), "git_repository_init");
+#ifdef USE_SUBMODULE_CACHE
+  git_repository_submodule_cache_all(repo);
+#endif
   return new_git_repository(repo);
 }
 
@@ -306,6 +313,14 @@ int create_remote_mirror(git_remote **out, git_repository *repo, const char *nam
   return error;
 }
 
+static int repository_enable_cache(git_repository **out, const char *path, int bare, void *payload) {
+  int res = git_repository_init(out, path, bare);
+#ifdef USE_SUBMODULE_CACHE
+  git_repository_submodule_cache_all(*out);
+#endif
+  return res;
+}
+
 SEXP R_git_repository_clone(SEXP url, SEXP path, SEXP branch, SEXP getkey, SEXP getcred,
                             SEXP bare, SEXP mirror, SEXP verbose){
   git_repository *repo = NULL;
@@ -314,6 +329,8 @@ SEXP R_git_repository_clone(SEXP url, SEXP path, SEXP branch, SEXP getkey, SEXP 
   auth_callback_data_t data_cb = auth_callback_data(getkey, getcred, Rf_asLogical(verbose));
   clone_opts.fetch_opts.callbacks.payload = &data_cb;
   clone_opts.fetch_opts.callbacks.credentials = auth_callback;
+  clone_opts.repository_cb = repository_enable_cache;
+
   set_verify_handler(&clone_opts.fetch_opts.callbacks);
 
   /* Also enables download progress and user interrupt */

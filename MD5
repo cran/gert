@@ -1,7 +1,7 @@
-7858fedd32fb0f188b6afdd5167de09f *DESCRIPTION
+a2c99b2eec419c31604cf23780683f6e *DESCRIPTION
 5acd18f82cf3f814c4455a6f785249f2 *LICENSE
 bf6cca212615f6d187549c6de2facb8d *NAMESPACE
-eec4221b5c9efbdb5f9be2456439856a *NEWS
+9aef40b3c7feffd88da15dbb4bf50645 *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 a573ea473b9704d024dced7d47a4dc1f *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -15,7 +15,7 @@ df6cc46bc7fae1a55b713f3d5065b35a *R/gert-package.R
 02c0d14a31e819763750734c02a2d9a1 *R/ignore.R
 74cf5e1b802a2cd93cb977391b9c257a *R/init.R
 c70d847ba33d399c9a6e03a597eb2d7b *R/merge.R
-c9c8d05f544dd43915034a577c480932 *R/open.R
+7476d1583863c6a3e38af93663084256 *R/open.R
 1e0fa65c141a1f01269f86ddd40c22eb *R/pr.R
 03d907a8e9f7ef1d0a78d9a4b5c1bebd *R/rebase.R
 fb7a07a86113a58f87af9ba34e732e41 *R/remotes.R
@@ -28,9 +28,9 @@ d70263783b0f004476b3d678e6ca1137 *R/tag.R
 a747b285beccecbe521693b29d75d6c9 *cleanup
 1742485cd9ff8b75d813b6ac33b4cd88 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
-1740df276c1bb79258b28c8f5b45b003 *inst/doc/gert.R
+4e3ea3ee5fb56bde4c93fec159ec7da7 *inst/doc/gert.R
 198d60c34c449963dbf7c922055d8d80 *inst/doc/gert.Rmd
-bf24388cccb41e2f3bc15f7906934516 *inst/doc/gert.html
+56ea44fc799682d071c92fe61752061d *inst/doc/gert.html
 0b2325419072c7db4ba095f73448714b *man/figures/logo.png
 81dd423717a2fbda755aaffa79a671b0 *man/gert-package.Rd
 43e9182dd76aa1c46f64a8d6edf861d6 *man/git_archive.Rd
@@ -53,9 +53,9 @@ c883273d1b2ab57f622282e19cb7eadc *man/git_stash.Rd
 f35700959ac9fbde3eaca070bfb35ffd *man/libgit2_config.Rd
 f324ff154fa12be8c82412e0118e4fe0 *man/user_is_configured.Rd
 b65209d367b8be40998431ba9298d441 *src/Makevars.in
-71230294c5d42543fdae308eb6ffa625 *src/Makevars.win
+dad3f06ea50654a289c371d0d60e53b0 *src/Makevars.win
 4d4386bad5a9793b2e058146f093b2f3 *src/branch.c
-ec9b9fe0164c1ad2da7d3aa74e1b8e17 *src/clone.c
+2db8c157861c523f409156f52e5e66cb *src/clone.c
 174d1f3110e585524e0f338e703dcd3f *src/commit.c
 72eee1bf384a25c9867fedb2fadbac70 *src/config.c
 d8b6e2d68d87c0b21bb00207573eb6ad *src/conflicts.c
@@ -89,5 +89,5 @@ a96c5bc27e89d45c7323920275ff1c0b *tests/testthat/test-open.R
 9e03268e0756ec1970c2ce5d72392d5c *tests/testthat/test-rebase.R
 767ea9ec89d599dc29a70be15e573d55 *tests/testthat/test-remotes.R
 cd64e67eb2e409c61a047fd63069b93a *tools/version.c
-de4af839275c7641d00e00f3d8d7648d *tools/winlibs.R
+8afff6b4ec778f7b37ce2642f8910ee6 *tools/winlibs.R
 198d60c34c449963dbf7c922055d8d80 *vignettes/gert.Rmd
