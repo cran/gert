@@ -1,7 +1,7 @@
-a2c99b2eec419c31604cf23780683f6e *DESCRIPTION
+5dae0668320993ed2c4aa9dfc2602d87 *DESCRIPTION
 5acd18f82cf3f814c4455a6f785249f2 *LICENSE
 bf6cca212615f6d187549c6de2facb8d *NAMESPACE
-9aef40b3c7feffd88da15dbb4bf50645 *NEWS
+152dc71925f1fe5a6aacfb29eeb64c4d *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 a573ea473b9704d024dced7d47a4dc1f *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -24,13 +24,13 @@ fb7a07a86113a58f87af9ba34e732e41 *R/remotes.R
 e895aa747fdeddaa082978585af007fa *R/stash.R
 688c43d1c458ca3a6915d8c30b7010a7 *R/submodules.R
 d70263783b0f004476b3d678e6ca1137 *R/tag.R
-394995853bfa038c0dc61b6124875a5c *build/vignette.rds
-a747b285beccecbe521693b29d75d6c9 *cleanup
-1742485cd9ff8b75d813b6ac33b4cd88 *configure
+f60e91512b84aa9a303054237a207bb8 *build/vignette.rds
+9500f25e755e828053b8d1ba43f5bc27 *cleanup
+b03957690638c4ec0c37b7d3f68a9c24 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 4e3ea3ee5fb56bde4c93fec159ec7da7 *inst/doc/gert.R
 198d60c34c449963dbf7c922055d8d80 *inst/doc/gert.Rmd
-56ea44fc799682d071c92fe61752061d *inst/doc/gert.html
+8515e903559d997f6e8f34706a46bf67 *inst/doc/gert.html
 0b2325419072c7db4ba095f73448714b *man/figures/logo.png
 81dd423717a2fbda755aaffa79a671b0 *man/gert-package.Rd
 43e9182dd76aa1c46f64a8d6edf861d6 *man/git_archive.Rd
@@ -55,7 +55,7 @@ f324ff154fa12be8c82412e0118e4fe0 *man/user_is_configured.Rd
 b65209d367b8be40998431ba9298d441 *src/Makevars.in
 dad3f06ea50654a289c371d0d60e53b0 *src/Makevars.win
 4d4386bad5a9793b2e058146f093b2f3 *src/branch.c
-2db8c157861c523f409156f52e5e66cb *src/clone.c
+c04d8c28bb27efb6e0a1922cf556199d *src/clone.c
 174d1f3110e585524e0f338e703dcd3f *src/commit.c
 72eee1bf384a25c9867fedb2fadbac70 *src/config.c
 d8b6e2d68d87c0b21bb00207573eb6ad *src/conflicts.c
