@@ -1,7 +1,7 @@
 Type: Package
 Package: gert
 Title: Simple Git Client for R
-Version: 2.1.0
+Version: 2.1.1
 Authors@R: c(
     person("Jeroen", "Ooms", role = c("aut", "cre"), email = "jeroen@berkeley.edu",
       comment = c(ORCID = "0000-0002-4035-0289")),
@@ -26,9 +26,9 @@ SystemRequirements: libgit2 (>= 1.0): libgit2-devel (rpm) or
         libgit2-dev (deb)
 Language: en-US
 NeedsCompilation: yes
-Packaged: 2024-07-18 11:33:57 UTC; jeroen
+Packaged: 2024-08-16 09:50:02 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),
   Jennifer Bryan [ctb] (<https://orcid.org/0000-0002-6983-2759>)
 Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
 Repository: CRAN
-Date/Publication: 2024-07-19 09:10:01 UTC
+Date/Publication: 2024-08-16 10:20:02 UTC
