@@ -1,4 +1,4 @@
-44db079a0266e780f57301e173c33902 *DESCRIPTION
+a647a4ff9a79f8194682aa13c633ac1f *DESCRIPTION
 5acd18f82cf3f814c4455a6f785249f2 *LICENSE
 bf6cca212615f6d187549c6de2facb8d *NAMESPACE
 8f79ade7858961f1034a0176235fb519 *NEWS
@@ -30,7 +30,7 @@ b03957690638c4ec0c37b7d3f68a9c24 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 4e3ea3ee5fb56bde4c93fec159ec7da7 *inst/doc/gert.R
 198d60c34c449963dbf7c922055d8d80 *inst/doc/gert.Rmd
-959e259900cb63ac81bcee26e51d2e7a *inst/doc/gert.html
+2001b4980c38d42fe4cd9f6ba34dde0f *inst/doc/gert.html
 0b2325419072c7db4ba095f73448714b *man/figures/logo.png
 f70fe89a4914d0e92e0c392d43dcc2fe *man/gert-package.Rd
 c28cdd9174bc91e70145b58b7a477d09 *man/git_archive.Rd
@@ -69,7 +69,7 @@ db4af265cf7d3cf87936991a14f75e9c *src/stash.c
 88ebd5f306049588aa0bc21b38544c48 *src/submodules.c
 7ba4124bc94f0adbf42d4629668b496c *src/tag.c
 bfa08fa636afc38d7b4d94bf77efbeb5 *src/utils.c
-06a9bd1146ce512e0e929f74b510bd96 *src/utils.h
+3db22ce92b45dcfa897130819f7954e7 *src/utils.h
 8686e8998b66f3ad4ebc4849393a7224 *src/version.c
 0622a97a2aaa3c342f09636052c2d7f5 *tests/spelling.R
 3e9926c634ae92d0233fc7cff669d9ad *tests/testthat.R
