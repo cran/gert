@@ -1,7 +1,7 @@
-a647a4ff9a79f8194682aa13c633ac1f *DESCRIPTION
+f3d8504ce12c265523db235d597ba355 *DESCRIPTION
 5acd18f82cf3f814c4455a6f785249f2 *LICENSE
 bf6cca212615f6d187549c6de2facb8d *NAMESPACE
-8f79ade7858961f1034a0176235fb519 *NEWS
+d3243235120d75adf82fb38a0fafd969 *NEWS
 f2ea2537b4ec1c793b61b45a5cb383e8 *R/archive.R
 57e81e921af16fb7804baf4d12987a04 *R/branch.R
 663eb9bb7a2268b230383b5591acba5d *R/certs.R
@@ -24,13 +24,13 @@ fb7a07a86113a58f87af9ba34e732e41 *R/remotes.R
 e895aa747fdeddaa082978585af007fa *R/stash.R
 688c43d1c458ca3a6915d8c30b7010a7 *R/submodules.R
 d70263783b0f004476b3d678e6ca1137 *R/tag.R
-478c5da1c7f9bfd7185b0433ef4a5f80 *build/vignette.rds
+fc90825749bac55c0590e64262111f64 *build/vignette.rds
 9500f25e755e828053b8d1ba43f5bc27 *cleanup
 b03957690638c4ec0c37b7d3f68a9c24 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
-4e3ea3ee5fb56bde4c93fec159ec7da7 *inst/doc/gert.R
+0e3ad44fffb2f0c56f39ef08cf2edea4 *inst/doc/gert.R
 198d60c34c449963dbf7c922055d8d80 *inst/doc/gert.Rmd
-2001b4980c38d42fe4cd9f6ba34dde0f *inst/doc/gert.html
+9f5c65764aa6a0dca9d6b7cbd7950c21 *inst/doc/gert.html
 0b2325419072c7db4ba095f73448714b *man/figures/logo.png
 f70fe89a4914d0e92e0c392d43dcc2fe *man/gert-package.Rd
 c28cdd9174bc91e70145b58b7a477d09 *man/git_archive.Rd
@@ -53,8 +53,8 @@ e170efae49239622c12e395effd2e229 *man/git_tag.Rd
 98bf155d7a520d4e902195abcd4d93f6 *man/github.Rd
 f35700959ac9fbde3eaca070bfb35ffd *man/libgit2_config.Rd
 f324ff154fa12be8c82412e0118e4fe0 *man/user_is_configured.Rd
-b65209d367b8be40998431ba9298d441 *src/Makevars.in
-dad3f06ea50654a289c371d0d60e53b0 *src/Makevars.win
+022550f158d458f42732f5aeedcc122e *src/Makevars.in
+7ae302cf9946a1a1d9185569e5b96b13 *src/Makevars.win
 2e96796daa37f14d79f5852fd6dc4899 *src/branch.c
 7cee8ffaef39b3e0b8fda5f40ea84deb *src/clone.c
 04c307bf5fee41ac2a20b7088b0288db *src/commit.c
@@ -78,7 +78,7 @@ bfa08fa636afc38d7b4d94bf77efbeb5 *src/utils.c
 fdc850d5c179f938d90d2907147f24ee *tests/testthat/key.pem
 379ed8c22a2dba1b2a98723da8f1f2be *tests/testthat/pat.bin
 b33429cd59aa9c625fdfa45a6f3c8c36 *tests/testthat/rsa3072.key
-d2cef23d70673118898a3f5865c787ab *tests/testthat/test-auth.R
+e96040c927f3a9ec87ec0e3bf297ef7c *tests/testthat/test-auth.R
 87ea9c456c53b8140f8d00a2ce742fcf *tests/testthat/test-clone.R
 4257a5addbc184db16ab2cd3e04e0612 *tests/testthat/test-commit.R
 fd78658779f7a91a06346cae6c536e56 *tests/testthat/test-config.R
@@ -88,5 +88,5 @@ a96c5bc27e89d45c7323920275ff1c0b *tests/testthat/test-open.R
 74a91ebe08573610b9d8c039d766c170 *tests/testthat/test-rebase.R
 767ea9ec89d599dc29a70be15e573d55 *tests/testthat/test-remotes.R
 cd64e67eb2e409c61a047fd63069b93a *tools/version.c
-8afff6b4ec778f7b37ce2642f8910ee6 *tools/winlibs.R
+9baefdf0503f64a0a0682f40a38e1cb9 *tools/winlibs.R
 198d60c34c449963dbf7c922055d8d80 *vignettes/gert.Rmd
