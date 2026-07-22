@@ -46,6 +46,7 @@ git_clone(
   ssh_key = NULL,
   bare = FALSE,
   mirror = FALSE,
+  depth = 0,
   verbose = interactive()
 )
 
@@ -64,7 +65,7 @@ or password protected ssh keys. Defaults to \link[askpass:askpass]{askpass} whic
 checks \code{getOption('askpass')}.}
 
 \item{ssh_key}{path or object containing your ssh private key. By default we
-look for keys in \code{ssh-agent} and \link[credentials:ssh_credentials]{credentials::ssh_key_info}.}
+look for keys in \code{ssh-agent} and \code{\link[credentials:ssh_key_info]{credentials::ssh_key_info()}}.}
 
 \item{prune}{delete tracking branches that no longer exist on the remote, or
 are not in the refspec (such as pull requests).}
@@ -72,7 +73,7 @@ are not in the refspec (such as pull requests).}
 \item{verbose}{display some progress info while downloading}
 
 \item{repo}{The path to the git repository. If the directory is not a
-repository, parent directories are considered (see \link{git_find}). To disable
+repository, parent directories are considered (see \code{\link[=git_find]{git_find()}}). To disable
 this search, provide the filepath protected with \code{\link[=I]{I()}}. When using this
 parameter, always explicitly call by name (i.e. \verb{repo = }) because future
 versions of gert may have additional parameters.}
@@ -89,16 +90,24 @@ successful and if the branch does not have an upstream set yet.}
 repositories, and \verb{https://yourname@github.com/} or \verb{git@github.com/} for
 private repos. You will be prompted for a password or pat when needed.}
 
-\item{path}{Directory of the Git repository to create.}
+\item{path}{Directory of the Git repository to create.
+By default, the "humanish" part of the URL.
+For instance, "git@github.com:someone/myrepo.git" will be cloned to
+\verb{myrepo/}.}
 
 \item{branch}{name of branch to check out locally}
 
 \item{bare}{use the \code{--bare} flag}
 
+\item{depth}{number of commits to fetch when creating a shallow clone. The
+default \code{0} clones the entire history. A positive value truncates the history
+to the given number of commits from the tip of each branch. Requires
+libgit2 >= 1.7.0.}
+
 \item{rebase}{if TRUE we try to rebase instead of merge local changes. This
 is not possible in case of conflicts (you will get an error).}
 
-\item{...}{arguments passed to \link{git_fetch}}
+\item{...}{arguments passed to \code{git_fetch()}}
 }
 \description{
 Functions to connect with a git server (remote) to fetch or push changes.
@@ -142,21 +151,26 @@ unlink(git_dir, recursive = TRUE)
 }
 }
 \seealso{
-Other git: 
+Other git:
 \code{\link{git_archive}},
-\code{\link{git_branch}()},
-\code{\link{git_commit}()},
-\code{\link{git_config}()},
-\code{\link{git_diff}()},
+\code{\link[=git_branch]{git_branch()}},
+\code{\link[=git_commit]{git_commit()}},
+\code{\link[=git_config]{git_config()}},
+\code{\link[=git_diff]{git_diff()}},
+\code{\link{git_history}},
 \code{\link{git_ignore}},
-\code{\link{git_merge}()},
-\code{\link{git_rebase}()},
+\code{\link[=git_merge]{git_merge()}},
+\code{\link[=git_rebase]{git_rebase()}},
 \code{\link{git_remote}},
 \code{\link{git_repo}},
-\code{\link{git_reset}()},
-\code{\link{git_signature}()},
+\code{\link[=git_reset]{git_reset()}},
+\code{\link[=git_restore]{git_restore()}},
+\code{\link[=git_revert]{git_revert()}},
+\code{\link[=git_signature]{git_signature()}},
 \code{\link{git_stash}},
 \code{\link{git_tag}},
 \code{\link{git_worktree}}
 }
 \concept{git}
+\section{Related libgit2 documentation}{\href{https://libgit2.org/docs/reference/main/remote/index.html}{\code{remote}}, \href{https://libgit2.org/docs/reference/main/clone/index.html}{\code{clone}}.}
+

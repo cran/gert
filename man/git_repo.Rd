@@ -14,38 +14,56 @@ git_find(path = ".")
 git_info(repo = ".")
 }
 \arguments{
-\item{path}{the location of the git repository, see details.}
+\item{path}{the location of the git repository, see the "path" section.}
 
 \item{bare}{if true, a Git repository without a working directory is created}
 
 \item{repo}{The path to the git repository. If the directory is not a
-repository, parent directories are considered (see \link{git_find}). To disable
+repository, parent directories are considered (see \code{\link[=git_find]{git_find()}}). To disable
 this search, provide the filepath protected with \code{\link[=I]{I()}}. When using this
 parameter, always explicitly call by name (i.e. \verb{repo = }) because future
 versions of gert may have additional parameters.}
 }
 \value{
-The path to the Git repository.
+\itemize{
+\item \code{git_find()} and \code{git_init()}: the path to the Git repository.
+\item \code{git_info()}: A list of information of the Git repository.
+}
 }
 \description{
-Use \code{git_init()} to create a new repository or \code{git_find()} to discover an
-existing local repository. \code{git_info()} shows basic information about a
-repository, such as the SHA and branch of the current HEAD.
+\itemize{
+\item \code{git_init()} creates a new repository
+\item \code{git_find()} to discover an existing local repository.
+\item \code{git_info()} shows basic information about a repository, such as the SHA
+and branch of the current HEAD.
 }
-\details{
+}
+\section{Path}{
+
+
 For \code{git_init()} the \code{path} parameter sets the directory of the git repository
 to create. If this directory already exists, it must be empty. If it does
 not exist, it is created, along with any intermediate directories that don't
-yet exist. For \code{git_find()} the \code{path} arguments specifies the directory at
+yet exist.
+
+For \code{git_find()}, the \code{path} parameter specifies the directory at
 which to start the search for a git repository. If it is not a git repository
 itself, then its parent directory is consulted, then the parent's parent, and
 so on.
 }
+
+\section{Detached head}{
+
+If \code{git_info()$shorthand} is equal to \code{HEAD},
+it means the repository is in a \href{https://jvns.ca/blog/2023/11/01/confusing-git-terminology/#detached-head-state}{detached head state}.
+}
+
 \examples{
 # directory does not yet exist
 r <- tempfile(pattern = "gert")
 git_init(r)
 git_find(r)
+git_info(r)
 
 # create a child directory, then a grandchild, then search
 r_grandchild_dir <- file.path(r, "aaa", "bbb")
@@ -65,21 +83,26 @@ git_find(r)
 unlink(r, recursive = TRUE)
 }
 \seealso{
-Other git: 
+Other git:
 \code{\link{git_archive}},
-\code{\link{git_branch}()},
-\code{\link{git_commit}()},
-\code{\link{git_config}()},
-\code{\link{git_diff}()},
-\code{\link{git_fetch}()},
+\code{\link[=git_branch]{git_branch()}},
+\code{\link[=git_commit]{git_commit()}},
+\code{\link[=git_config]{git_config()}},
+\code{\link[=git_diff]{git_diff()}},
+\code{\link[=git_fetch]{git_fetch()}},
+\code{\link{git_history}},
 \code{\link{git_ignore}},
-\code{\link{git_merge}()},
-\code{\link{git_rebase}()},
+\code{\link[=git_merge]{git_merge()}},
+\code{\link[=git_rebase]{git_rebase()}},
 \code{\link{git_remote}},
-\code{\link{git_reset}()},
-\code{\link{git_signature}()},
+\code{\link[=git_reset]{git_reset()}},
+\code{\link[=git_restore]{git_restore()}},
+\code{\link[=git_revert]{git_revert()}},
+\code{\link[=git_signature]{git_signature()}},
 \code{\link{git_stash}},
 \code{\link{git_tag}},
 \code{\link{git_worktree}}
 }
 \concept{git}
+\section{Related libgit2 documentation}{\href{https://libgit2.org/docs/reference/main/repository/index.html}{\code{repository}}.}
+

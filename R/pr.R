@@ -2,8 +2,8 @@
 #'
 #' Fetch and checkout pull requests.
 #'
-#' By default `git_fetch_pull_requests` will download all PR branches. To
-#' remove these again simply use `git_fetch(prune = TRUE)`.
+#' By default `git_fetch_pull_requests()` will download all PR branches. To
+#' remove these again simply use [git_fetch(prune = TRUE)][git_fetch()].
 #'
 #' @export
 #' @rdname github
@@ -12,7 +12,9 @@
 #' pull requests.
 git_checkout_pull_request <- function(pr = 1, remote = NULL, repo = '.') {
   pr <- as.character(pr)
-  if (!length(remote)) remote <- git_info(repo)$remote
+  if (!length(remote)) {
+    remote <- git_info(repo)$remote
+  }
   local_branch <- sprintf("pr/%s", pr)
   remote_branch <- sprintf("%s/pr/%s", remote, pr)
   git_fetch_pull_requests(pr = pr, remote = remote, repo = repo)
@@ -30,7 +32,9 @@ git_checkout_pull_request <- function(pr = 1, remote = NULL, repo = '.') {
 #' @rdname github
 git_fetch_pull_requests <- function(pr = '*', remote = NULL, repo = '.') {
   pr <- as.character(pr)
-  if (!length(remote)) remote <- git_info(repo)$remote
+  if (!length(remote)) {
+    remote <- git_info(repo)$remote
+  }
   refspec <- sprintf('+refs/pull/%s/head:refs/remotes/%s/pr/%s', pr, remote, pr)
   git_fetch(remote = remote, refspec = refspec, repo = repo)
   invisible(refspec)

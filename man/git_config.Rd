@@ -3,29 +3,51 @@
 \name{git_config}
 \alias{git_config}
 \alias{git_config_global}
+\alias{git_config_get}
+\alias{git_config_local_get}
+\alias{git_config_global_get}
 \alias{git_config_set}
 \alias{git_config_global_set}
+\alias{git_config_unset}
+\alias{git_config_global_unset}
 \title{Get or set Git configuration}
 \usage{
 git_config(repo = ".")
 
 git_config_global()
 
-git_config_set(name, value, repo = ".")
+git_config_get(name, repo = ".")
 
-git_config_global_set(name, value)
+git_config_local_get(name, repo = ".")
+
+git_config_global_get(name)
+
+git_config_set(name, value, add = FALSE, repo = ".")
+
+git_config_global_set(name, value, add = FALSE)
+
+git_config_unset(name, pattern = NULL, repo = ".")
+
+git_config_global_unset(name, pattern = NULL)
 }
 \arguments{
 \item{repo}{The path to the git repository. If the directory is not a
-repository, parent directories are considered (see \link{git_find}). To disable
+repository, parent directories are considered (see \code{\link[=git_find]{git_find()}}). To disable
 this search, provide the filepath protected with \code{\link[=I]{I()}}. When using this
 parameter, always explicitly call by name (i.e. \verb{repo = }) because future
 versions of gert may have additional parameters.}
 
-\item{name}{Name of the option to set}
+\item{name}{Name of the option to get or set}
 
 \item{value}{Value to set. Must be a string, logical, number or \code{NULL} (to
 unset).}
+
+\item{add}{if \code{TRUE}, append a new entry for \code{name} instead of replacing
+existing one(s). Equivalent to \verb{git config --add}. Only supported for
+string values.}
+
+\item{pattern}{optional regular expression, for matching values to unset in
+case of multiple values}
 }
 \value{
 \itemize{
@@ -34,19 +56,29 @@ of \code{repo}, one row per option. The \code{level} column reveals whether the
 option is determined from global or local config.
 \item \code{git_config_global()}: a \code{data.frame}, as for \code{git_config()}, except only
 for global Git options.
-\item \code{git_config_set()}, \code{git_config_global_set()}: The previous value of
+\item \code{git_config_get()}: the value of the named option considering both local and
+global config (local wins), or \code{NULL} if unset.
+\item \code{git_config_local_get()}: as for \code{git_config_get()}, but restricted to
+local (repository-level) config only.
+\item \code{git_config_global_get()}: as for \code{git_config_get()}, but for global config only.
+\item \code{git_config_set()}, \code{git_config_global_set()}: The previous value(s) of
 \code{name} in local or global config, respectively. If this option was
 previously unset, returns \code{NULL}. Returns invisibly.
+\item \code{git_config_unset()}, \code{git_config_global_unset()}: The previous value(s) of
+\code{name} that were unset. Returns invisibly.
 }
 }
 \description{
-Get or set Git options, as \verb{git config} does on the command line. \strong{Global}
-settings affect all of a user's Git operations (\verb{git config --global}),
-whereas \strong{local} settings are scoped to a specific repository (\verb{git config --local}). When both exist, local options always win. Four functions address
-the four possible combinations of getting vs setting and global vs. local.\tabular{lll}{
+Get, set, or unset Git options, as \verb{git config} does on the command line.
+\strong{Global} settings affect all of a user's Git operations
+(\verb{git config --global}), whereas \strong{local} settings are scoped to a specific
+repository (\verb{git config --local}). When both exist, local options always win.\tabular{lll}{
     \tab \strong{local} \tab \strong{global} \cr
-   get \tab \code{git_config()} \tab \code{git_config_global()} \cr
+   get all \tab \code{git_config()} \tab \code{git_config_global()} \cr
+   get one (local+global) \tab \code{git_config_get()} \tab \code{git_config_get()} \cr
+   get one (local or global only) \tab \code{git_config_local_get()} \tab \code{git_config_global_get()} \cr
    set \tab \code{git_config_set()} \tab \code{git_config_global_set()} \cr
+   unset \tab \code{git_config_unset()} \tab \code{git_config_global_unset()} \cr
 }
 }
 \note{
@@ -61,15 +93,16 @@ git_init(r)
 
 previous <- git_config_set("aaa.bbb", "ccc", repo = r)
 previous
-cfg <- git_config(repo = r)
-subset(cfg, level == "local")
-cfg$value[cfg$name == "aaa.bbb"]
+git_config_local_get("aaa.bbb", repo = r)
 
 previous <- git_config_set("aaa.bbb", NULL, repo = r)
 previous
-cfg <- git_config(repo = r)
-subset(cfg, level == "local")
-cfg$value[cfg$name == "aaa.bbb"]
+git_config_local_get("aaa.bbb", repo = r)
+
+# Get a single named option (returns NULL if unset)
+git_config_get("aaa.bbb", repo = r)
+git_config_set("aaa.bbb", "ccc", repo = r)
+git_config_get("aaa.bbb", repo = r)
 
 unlink(r, recursive = TRUE)
 
@@ -78,24 +111,33 @@ unlink(r, recursive = TRUE)
 git_config_global_set("user.name", "Your Name")
 git_config_global_set("user.email", "your@email.com")
 git_config_global()
+
+# Get a single global option (returns NULL if unset)
+git_config_global_get("user.name")
+git_config_global_get("gert.nonexistent")
 }
 }
 \seealso{
-Other git: 
+Other git:
 \code{\link{git_archive}},
-\code{\link{git_branch}()},
-\code{\link{git_commit}()},
-\code{\link{git_diff}()},
-\code{\link{git_fetch}()},
+\code{\link[=git_branch]{git_branch()}},
+\code{\link[=git_commit]{git_commit()}},
+\code{\link[=git_diff]{git_diff()}},
+\code{\link[=git_fetch]{git_fetch()}},
+\code{\link{git_history}},
 \code{\link{git_ignore}},
-\code{\link{git_merge}()},
-\code{\link{git_rebase}()},
+\code{\link[=git_merge]{git_merge()}},
+\code{\link[=git_rebase]{git_rebase()}},
 \code{\link{git_remote}},
 \code{\link{git_repo}},
-\code{\link{git_reset}()},
-\code{\link{git_signature}()},
+\code{\link[=git_reset]{git_reset()}},
+\code{\link[=git_restore]{git_restore()}},
+\code{\link[=git_revert]{git_revert()}},
+\code{\link[=git_signature]{git_signature()}},
 \code{\link{git_stash}},
 \code{\link{git_tag}},
 \code{\link{git_worktree}}
 }
 \concept{git}
+\section{Related libgit2 documentation}{\href{https://libgit2.org/docs/reference/main/config/index.html}{\code{config}}.}
+

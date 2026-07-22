@@ -4,6 +4,7 @@
 \alias{git_branch}
 \alias{git_branch_list}
 \alias{git_branch_checkout}
+\alias{git_branch_switch}
 \alias{git_branch_create}
 \alias{git_branch_delete}
 \alias{git_branch_move}
@@ -17,6 +18,8 @@ git_branch(repo = ".")
 git_branch_list(local = NULL, repo = ".")
 
 git_branch_checkout(branch, force = FALSE, orphan = FALSE, repo = ".")
+
+git_branch_switch(branch, force = FALSE, orphan = FALSE, repo = ".")
 
 git_branch_create(
   branch,
@@ -38,7 +41,7 @@ git_branch_exists(branch, local = TRUE, repo = ".")
 }
 \arguments{
 \item{repo}{The path to the git repository. If the directory is not a
-repository, parent directories are considered (see \link{git_find}). To disable
+repository, parent directories are considered (see \code{\link[=git_find]{git_find()}}). To disable
 this search, provide the filepath protected with \code{\link[=I]{I()}}. When using this
 parameter, always explicitly call by name (i.e. \verb{repo = }) because future
 versions of gert may have additional parameters.}
@@ -63,22 +66,87 @@ branches. Use NULL to return all branches.}
 \description{
 Create, list, and checkout branches.
 }
+\examples{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+# Creating a branch
+repo <- file.path(tempdir(), "myrepo")
+git_init(repo)
+writeLines("hello", file.path(repo, "hello.txt"))
+git_add("hello.txt", repo = repo)
+first_commit <- git_commit("First commit", repo = repo)
+
+git_branch_create("new-feat", repo = repo)
+writeLines("world", file.path(repo, "hello.txt"))
+git_add("hello.txt", repo = repo)
+second_commit <- git_commit("Second commit", repo = repo)
+
+# Changing branches
+git_branch(repo = repo)
+git_branch_switch("main", repo = repo)
+git_branch(repo = repo)
+
+git_branch_exists("new-feat", repo = repo)
+
+# Listing branches
+git_branch_list(repo = repo)
+
+# Renaming a branch
+git_branch_move("new-feat", "better-name", repo = repo)
+git_branch_exists("new-feat", repo = repo)
+git_branch_list(repo = repo)
+
+# Deleting a branch
+git_branch_delete("better-name", repo = repo)
+git_branch_exists("better-name", repo = repo)
+
+# clean up
+unlink(repo, recursive = TRUE)
+# ------------------------
+# Creating an orphan branch
+repo <- file.path(tempdir(), "myrepo")
+git_init(repo)
+
+# Set a user if no default
+if (!user_is_configured()) {
+  git_config_set("user.name", "Jerry")
+  git_config_set("user.email", "jerry@gmail.com")
+}
+writeLines("hello", file.path(repo, "hello.txt"))
+git_add("hello.txt", repo = repo)
+first_commit <- git_commit("First commit", repo = repo)
+
+writeLines("world", file.path(repo, "hello.txt"))
+git_add("hello.txt", repo = repo)
+second_commit <- git_commit("Second commit", repo = repo)
+
+# Check out first commit
+git_branch_checkout(first_commit, orphan = TRUE, repo = repo)
+git_status(repo)
+# clean up
+unlink(repo, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
-Other git: 
+Other git:
 \code{\link{git_archive}},
-\code{\link{git_commit}()},
-\code{\link{git_config}()},
-\code{\link{git_diff}()},
-\code{\link{git_fetch}()},
+\code{\link[=git_commit]{git_commit()}},
+\code{\link[=git_config]{git_config()}},
+\code{\link[=git_diff]{git_diff()}},
+\code{\link[=git_fetch]{git_fetch()}},
+\code{\link{git_history}},
 \code{\link{git_ignore}},
-\code{\link{git_merge}()},
-\code{\link{git_rebase}()},
+\code{\link[=git_merge]{git_merge()}},
+\code{\link[=git_rebase]{git_rebase()}},
 \code{\link{git_remote}},
 \code{\link{git_repo}},
-\code{\link{git_reset}()},
-\code{\link{git_signature}()},
+\code{\link[=git_reset]{git_reset()}},
+\code{\link[=git_restore]{git_restore()}},
+\code{\link[=git_revert]{git_revert()}},
+\code{\link[=git_signature]{git_signature()}},
 \code{\link{git_stash}},
 \code{\link{git_tag}},
 \code{\link{git_worktree}}
 }
 \concept{git}
+\section{Related libgit2 documentation}{\href{https://libgit2.org/docs/reference/main/branch/index.html}{\code{branch}}, \href{https://libgit2.org/docs/reference/main/checkout/index.html}{\code{checkout}}.}
+

@@ -1,16 +1,23 @@
 #' Cherry-Pick and Rebase
 #'
-#' A cherry-pick applies the changes from a given commit (from another branch)
-#' onto the current branch. A rebase resets the branch to the state of another
-#' branch (upstream) and then re-applies your local changes by cherry-picking
-#' each of your local commits onto the upstream commit history.
+#' @description
+#' * `git_cherry_pick()` applies the changes from a given commit (from another branch)
+#' onto the current branch.
+#' *`git_rebase_commit()` resets the branch to the state of another branch (upstream)
+#' and then re-applies your local changes by cherry-picking each of your local
+#' commits onto the upstream commit history.
+#' *`git_rebase_list()` shows your local commits that are missing from the `upstream`
+#' history, and if they conflict with upstream changes.
 #'
-#' `git_rebase_list` shows your local commits that are missing from the `upstream`
-#' history, and if they conflict with upstream changes. It does so by performing
-#' a rebase dry-run, without committing anything. If there are no conflicts, you
-#' can use `git_rebase_commit` to rewind and rebase your branch onto `upstream`.
+#'
+#' @details
+#' To find if your local commits are missing from `upstream`,
+#' `git_rebase_list()` first performs a rebase dry-run, without committing
+#' anything. If there are no conflicts, you can use `git_rebase_commit()`
+#' to rewind and rebase your branch onto `upstream`.
+#'
 #' Gert only support a clean rebase; it never leaves the repository in unfinished
-#' "rebasing" state. If conflicts arise, `git_rebase_commit` will raise an error
+#' "rebasing" state. If conflicts arise, `git_rebase_commit()` will raise an error
 #' without making changes.
 #'
 #' @export
@@ -19,9 +26,10 @@
 #' @family git
 #' @param upstream branch to which you want to rewind and re-apply your
 #' local commits. The default uses the remote upstream branch with the
-#' current state on the git server, simulating [git_pull].
+#' current state on the git server, simulating [git_pull()].
 #' @inheritParams git_open
 #' @inheritParams git_branch
+#' @git rebase
 git_rebase_list <- function(upstream = NULL, repo = '.') {
   git_rebase(upstream = upstream, commit_changes = FALSE, repo = repo)
 }
@@ -37,8 +45,11 @@ git_rebase <- function(upstream, commit_changes, repo) {
   repo <- git_open(repo)
   info <- git_info(repo = repo)
   if (!length(upstream)) {
-    if (!length(info$upstream) || is.na(info$upstream) || !nchar(info$upstream))
+    if (
+      !length(info$upstream) || is.na(info$upstream) || !nchar(info$upstream)
+    ) {
       stop("No upstream configured for current HEAD")
+    }
     git_fetch(info$remote, repo = repo)
     upstream <- info$upstream
   }
@@ -63,6 +74,7 @@ git_rebase <- function(upstream, commit_changes, repo) {
 #' @export
 #' @name git_reset
 #' @rdname git_reset
+#' @git reset
 git_reset_hard <- function(ref = "HEAD", repo = ".") {
   git_reset("hard", ref = ref, repo = repo)
 }
@@ -96,6 +108,7 @@ git_reset <- function(
 #' @rdname git_rebase
 #' @useDynLib gert R_git_cherry_pick
 #' @param commit id of the commit to cherry pick
+#' @git cherrypick
 git_cherry_pick <- function(commit, repo = '.') {
   repo <- git_open(repo)
   assert_string(commit)
@@ -105,9 +118,14 @@ git_cherry_pick <- function(commit, repo = '.') {
 #' @export
 #' @rdname git_rebase
 #' @useDynLib gert R_git_ahead_behind
+#' @git graph
 git_ahead_behind <- function(upstream = NULL, ref = 'HEAD', repo = '.') {
   repo <- git_open(repo)
-  if (!length(upstream)) upstream <- git_info(repo = repo)$upstream
-  if (!length(upstream)) stop("No upstream set or specified")
+  if (!length(upstream)) {
+    upstream <- git_info(repo = repo)$upstream
+  }
+  if (!length(upstream)) {
+    stop("No upstream set or specified")
+  }
   .Call(R_git_ahead_behind, repo, ref, upstream)
 }

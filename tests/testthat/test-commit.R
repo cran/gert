@@ -10,7 +10,7 @@ test_that("creating signatures", {
   expect_equal(sigdata$email, email)
   expect_lt(difftime(sigdata$time, now, 'secs'), 1)
 
-  yesterday <- now - 24*60*60
+  yesterday <- now - 24 * 60 * 60
   sig <- git_signature(name, email, time = yesterday)
   sigdata <- git_signature_parse(sig)
   expect_equal(sigdata$name, name)
@@ -51,14 +51,17 @@ test_that("creating a commit", {
   # Another commit before that
   write.csv(iris, file.path(repo, 'iris.csv'))
   git_add("iris.csv", repo = repo)
-  timestamp <- round(Sys.time() - 48*60*60)
+  timestamp <- round(Sys.time() - 48 * 60 * 60)
   sig2 <- git_signature('nobody', 'nobody@gmail.com', time = timestamp)
   git_commit("Added iris.csv also", author = sig2, repo = repo)
 
   # Inspect the log file
   log <- git_log(repo = repo)
   expect_equal(log$author[2], local_author(repo))
-  expect_equal(log$time[1], timestamp)
+  expect_equal(
+    format(log$time[1], format = "%Y-%m-%d %H:%M:%S %Z"),
+    format(timestamp, format = "%Y-%m-%d %H:%M:%S %Z")
+  )
 })
 
 test_that("Passing ref into git_ls gives correct info", {
@@ -130,8 +133,11 @@ test_that("status reports a conflicted file", {
   rebase_info <- git_rebase_list("my-branch", repo = repo)
   expect_equal(rebase_info$type, rep("pick", 3))
   expect_equal(rebase_info$commit, rev(head(git_log(repo = repo), -1)$commit))
-  expect_equal(rebase_info$conflicts, c(T,T,F))
-  expect_error(git_rebase_commit("my-branch", repo = repo), class = "GIT_EMERGECONFLICT")
+  expect_equal(rebase_info$conflicts, c(T, T, F))
+  expect_error(
+    git_rebase_commit("my-branch", repo = repo),
+    class = "GIT_EMERGECONFLICT"
+  )
   expect_error(git_branch_fast_forward("my-branch", repo = repo))
 
   # Merge returns FALSE due to conflicts
@@ -163,4 +169,101 @@ test_that("status reports a conflicted file", {
   git_commit("Resolve merge conflict", repo = repo)
   expect_length(git_conflicts(repo = repo)$our, 0)
   expect_length(git_status(repo = repo)$file, 0)
+})
+
+test_that("git_log path filtering works", {
+  repo <- git_init(tempfile("gert-tests-commit"))
+  on.exit(unlink(repo, recursive = TRUE))
+  configure_local_user(repo)
+
+  writeLines("hello", file.path(repo, "foo.txt"))
+  git_add("foo.txt", repo = repo)
+  git_commit("Add foo.txt", repo = repo)
+
+  writeLines("world", file.path(repo, "bar.txt"))
+  git_add("bar.txt", repo = repo)
+  git_commit("Add bar.txt", repo = repo)
+
+  writeLines("updated", file.path(repo, "foo.txt"))
+  git_add("foo.txt", repo = repo)
+  git_commit("Update foo.txt", repo = repo)
+
+  log_all <- git_log(repo = repo)
+  expect_equal(nrow(log_all), 3)
+
+  log_foo <- git_log(path = "foo.txt", repo = repo)
+  expect_equal(nrow(log_foo), 2)
+  expect_true(all(grepl("foo", log_foo$message)))
+
+  log_bar <- git_log(path = "bar.txt", repo = repo)
+  expect_equal(nrow(log_bar), 1)
+  expect_match(log_bar$message, "bar.txt")
+})
+
+test_that("reverting a commit", {
+  repo <- git_init(tempfile("gert-tests-revert"))
+  on.exit(unlink(repo, recursive = TRUE))
+  configure_local_user(repo)
+
+  writeLines("hello", file.path(repo, "hello.txt"))
+  git_add("hello.txt", repo = repo)
+  git_commit("First commit", repo = repo)
+
+  writeLines("world", file.path(repo, "hello.txt"))
+  git_add("hello.txt", repo = repo)
+  second <- git_commit("Second commit", repo = repo)
+
+  # Default: stages + commits
+  revert_sha <- git_revert(second, repo = repo)
+  expect_type(revert_sha, "character")
+  log <- git_log(repo = repo)
+  expect_shape(log, nrow = 3)
+  expect_match(log$message[1], '^Revert "Second commit"')
+  expect_equal(readLines(file.path(repo, "hello.txt")), "hello")
+
+  # commit = FALSE: only stages
+  writeLines("again", file.path(repo, "hello.txt"))
+  git_add("hello.txt", repo = repo)
+  third <- git_commit("Third commit", repo = repo)
+  result <- git_revert(third, commit = FALSE, repo = repo)
+  expect_null(result)
+  status <- git_status(repo = repo)
+  expect_true(any(status$staged))
+})
+
+test_that("git_revert accepts ancestor references like HEAD~1", {
+  repo <- git_init(tempfile("gert-tests-revert-ancestor"))
+  on.exit(unlink(repo, recursive = TRUE))
+  configure_local_user(repo)
+
+  writeLines("a", file.path(repo, "a.txt"))
+  git_add("a.txt", repo = repo)
+  git_commit("First commit", repo = repo)
+
+  # Second commit touches its own file so reverting it won't conflict with Third
+  writeLines("b", file.path(repo, "b.txt"))
+  git_add("b.txt", repo = repo)
+  git_commit("Second commit", repo = repo)
+
+  writeLines("c", file.path(repo, "c.txt"))
+  git_add("c.txt", repo = repo)
+  git_commit("Third commit", repo = repo)
+
+  # HEAD~1 resolves to "Second commit"
+  revert_sha <- git_revert("HEAD~1", repo = repo)
+  expect_type(revert_sha, "character")
+  log <- git_log(repo = repo)
+  expect_match(log$message[1], '^Revert "Second commit"')
+})
+
+test_that("git_revert raises an error for an invalid commit", {
+  repo <- git_init(tempfile("gert-tests-revert-invalid"))
+  on.exit(unlink(repo, recursive = TRUE))
+  configure_local_user(repo)
+
+  writeLines("hello", file.path(repo, "hello.txt"))
+  git_add("hello.txt", repo = repo)
+  git_commit("First commit", repo = repo)
+
+  expect_error(git_revert("notacommit", repo = repo), "notacommit")
 })

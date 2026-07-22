@@ -1,10 +1,11 @@
 Type: Package
 Package: gert
 Title: Simple Git Client for R
-Version: 2.3.1
+Version: 2.4.0
 Authors@R: c(
     person("Jeroen", "Ooms", role = c("aut", "cre"), email = "jeroenooms@gmail.com",
       comment = c(ORCID = "0000-0002-4035-0289")),
+    person("Maëlle", "Salmon", role = "aut", comment = c(ORCID = "0000-0002-2815-0399")),
     person("Jennifer", "Bryan", role = "ctb", email = "jenny@posit.co",
       comment = c(ORCID = "0000-0002-6983-2759")))
 Description: Simple git client for R based on 'libgit2' <https://libgit2.org> with
@@ -18,17 +19,19 @@ URL: https://docs.ropensci.org/gert/,
 BugReports: https://github.com/r-lib/gert/issues
 Imports: askpass, credentials (>= 1.2.1), openssl (>= 2.0.3),
         rstudioapi (>= 0.11), sys, zip (>= 2.1.0)
-Suggests: spelling, knitr, rmarkdown, testthat
+Suggests: spelling, knitr, rmarkdown, testthat (>= 3.0.0), roxygen2
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 SystemRequirements: libgit2 (>= 1.0): libgit2-devel (rpm) or
         libgit2-dev (deb)
 Language: en-US
+Config/roxygen2/version: 8.0.0
+Config/testthat/edition: 3
 NeedsCompilation: yes
-Packaged: 2026-01-11 11:37:47 UTC; jeroen
+Packaged: 2026-07-22 09:03:39 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>),
+  Maëlle Salmon [aut] (ORCID: <https://orcid.org/0000-0002-2815-0399>),
   Jennifer Bryan [ctb] (ORCID: <https://orcid.org/0000-0002-6983-2759>)
 Maintainer: Jeroen Ooms <jeroenooms@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-01-11 23:50:02 UTC
+Date/Publication: 2026-07-22 09:40:02 UTC

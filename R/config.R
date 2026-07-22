@@ -1,17 +1,16 @@
 #' Get or set Git configuration
 #'
 #' @description
-#' Get or set Git options, as `git config` does on the command line. **Global**
-#' settings affect all of a user's Git operations (`git config --global`),
-#' whereas **local** settings are scoped to a specific repository (`git config
-#' --local`). When both exist, local options always win. Four functions address
-#' the four possible combinations of getting vs setting and global vs. local.
+#' Get, set, or unset Git options, as `git config` does on the command line.
+#' **Global** settings affect all of a user's Git operations
+#' (`git config --global`), whereas **local** settings are scoped to a specific
+#' repository (`git config --local`). When both exist, local options always win.
 #'
 #' ```{r echo = FALSE, results = "asis"}
 #' dat <- data.frame(
-#'   local = c("`git_config()`", "`git_config_set()`"),
-#'   global = c("`git_config_global()`", "`git_config_global_set()`"),
-#'   row.names = c("get", "set")
+#'   local = c("`git_config()`", "`git_config_get()`", "`git_config_local_get()`", "`git_config_set()`", "`git_config_unset()`"),
+#'   global = c("`git_config_global()`", "`git_config_get()`", "`git_config_global_get()`", "`git_config_global_set()`", "`git_config_global_unset()`"),
+#'   row.names = c("get all", "get one (local+global)", "get one (local or global only)", "set", "unset")
 #' )
 #' knitr::kable(dat, col.names = paste0("**", colnames(dat), "**"))
 #' ```
@@ -21,9 +20,16 @@
 #'   option is determined from global or local config.
 #' * `git_config_global()`: a `data.frame`, as for `git_config()`, except only
 #'   for global Git options.
-#' * `git_config_set()`, `git_config_global_set()`: The previous value of
+#' * `git_config_get()`: the value of the named option considering both local and
+#'   global config (local wins), or `NULL` if unset.
+#' * `git_config_local_get()`: as for `git_config_get()`, but restricted to
+#'   local (repository-level) config only.
+#' * `git_config_global_get()`: as for `git_config_get()`, but for global config only.
+#' * `git_config_set()`, `git_config_global_set()`: The previous value(s) of
 #'   `name` in local or global config, respectively. If this option was
 #'   previously unset, returns `NULL`. Returns invisibly.
+#' * `git_config_unset()`, `git_config_global_unset()`: The previous value(s) of
+#'   `name` that were unset. Returns invisibly.
 #'
 #' @note All entries in the `name` column are automatically normalised to
 #'   lowercase (see
@@ -36,15 +42,16 @@
 #'
 #' previous <- git_config_set("aaa.bbb", "ccc", repo = r)
 #' previous
-#' cfg <- git_config(repo = r)
-#' subset(cfg, level == "local")
-#' cfg$value[cfg$name == "aaa.bbb"]
+#' git_config_local_get("aaa.bbb", repo = r)
 #'
 #' previous <- git_config_set("aaa.bbb", NULL, repo = r)
 #' previous
-#' cfg <- git_config(repo = r)
-#' subset(cfg, level == "local")
-#' cfg$value[cfg$name == "aaa.bbb"]
+#' git_config_local_get("aaa.bbb", repo = r)
+#'
+#' # Get a single named option (returns NULL if unset)
+#' git_config_get("aaa.bbb", repo = r)
+#' git_config_set("aaa.bbb", "ccc", repo = r)
+#' git_config_get("aaa.bbb", repo = r)
 #'
 #' unlink(r, recursive = TRUE)
 #'
@@ -53,11 +60,16 @@
 #' git_config_global_set("user.name", "Your Name")
 #' git_config_global_set("user.email", "your@email.com")
 #' git_config_global()
+#'
+#' # Get a single global option (returns NULL if unset)
+#' git_config_global_get("user.name")
+#' git_config_global_get("gert.nonexistent")
 #' }
 #' @export
 #' @family git
 #' @inheritParams git_open
 #' @useDynLib gert R_git_config_list
+#' @git config
 git_config <- function(repo = '.') {
   repo <- git_open(repo)
   .Call(R_git_config_list, repo)
@@ -71,16 +83,52 @@ git_config_global <- function() {
 
 #' @export
 #' @rdname git_config
+#' @param name Name of the option to get or set
+git_config_get <- function(name, repo = '.') {
+  cfg <- git_config(repo = repo)
+  if (!name %in% cfg$name) {
+    return(NULL)
+  }
+  cfg$value[cfg$name == name]
+}
+
+#' @export
+#' @rdname git_config
+git_config_local_get <- function(name, repo = '.') {
+  cfg <- git_config(repo = repo)
+  cfg <- cfg[cfg$level == "local", ]
+  if (!name %in% cfg$name) {
+    return(NULL)
+  }
+  cfg$value[cfg$name == name]
+}
+
+#' @export
+#' @rdname git_config
+git_config_global_get <- function(name) {
+  cfg <- git_config_global()
+  if (!name %in% cfg$name) {
+    return(NULL)
+  }
+  cfg$value[cfg$name == name]
+}
+
+#' @export
+#' @rdname git_config
 #' @useDynLib gert R_git_config_set
-#' @param name Name of the option to set
 #' @param value Value to set. Must be a string, logical, number or `NULL` (to
 #'   unset).
-git_config_set <- function(name, value, repo = '.') {
+#' @param add if `TRUE`, append a new entry for `name` instead of replacing
+#'   existing one(s). Equivalent to `git config --add`. Only supported for
+#'   string values.
+git_config_set <- function(name, value, add = FALSE, repo = '.') {
+  if (!is.logical(add) || length(add) != 1) {
+    stop("Argument add must be a logical of length 1.", call. = FALSE)
+  }
   repo <- git_open(repo)
   name <- as.character(name)
-  orig_cfg <- git_config(repo = repo)
-  out <- orig_cfg$value[orig_cfg$name == name & orig_cfg$level == "local"]
-  .Call(R_git_config_set, repo, name, value)
+  out <- git_config_local_get(name, repo = repo)
+  .Call(R_git_config_set, repo, name, value, add)
   if (length(out) > 0) {
     invisible(out)
   } else {
@@ -90,15 +138,29 @@ git_config_set <- function(name, value, repo = '.') {
 
 #' @export
 #' @rdname git_config
-git_config_global_set <- function(name, value) {
-  orig_cfg <- git_config_global()
-  out <- orig_cfg$value[orig_cfg$name == name]
-  .Call(R_git_config_set, NULL, name, value)
+git_config_global_set <- function(name, value, add = FALSE) {
+  out <- git_config_global_get(name)
+  .Call(R_git_config_set, NULL, name, value, add)
   if (length(out) > 0) {
     invisible(out)
   } else {
     invisible(NULL)
   }
+}
+
+#' @export
+#' @rdname git_config
+#' @useDynLib gert R_git_config_unset
+#' @param pattern optional regular expression, for matching values to unset in
+#' case of multiple values
+git_config_unset <- function(name, pattern = NULL, repo = '.'){
+  .Call(R_git_config_unset, git_open(repo), name, pattern)
+}
+
+#' @export
+#' @rdname git_config
+git_config_global_unset <- function(name, pattern = NULL){
+  .Call(R_git_config_unset, NULL, name, pattern)
 }
 
 #' Show libgit2 version and capabilities
@@ -134,9 +196,8 @@ configure_global_user <- function() {
 }
 
 global_user_is_configured <- function() {
-  cfg <- git_config_global()
-  user_name_exists <- any(cfg$name == "user.name")
-  user_email_exists <- any(cfg$name == "user.email")
+  user_name_exists <- !is.null(git_config_global_get("user.name"))
+  user_email_exists <- !is.null(git_config_global_get("user.email"))
   user_name_exists && user_email_exists
 }
 
@@ -154,14 +215,16 @@ global_user_is_configured <- function() {
 #'   `FALSE` otherwise.
 #'
 #' @export
-#' @examples
+#' @examplesIf interactive()
 #' user_is_configured()
 user_is_configured <- function(repo = ".") {
-  cfg <- tryCatch(
-    git_config(repo),
-    error = function(e) git_config_global()
-  )
-  user_name_exists <- any(cfg$name == "user.name")
-  user_email_exists <- any(cfg$name == "user.email")
+  user_name_exists <- !is.null(tryCatch(
+    git_config_get("user.name", repo = repo),
+    error = function(e) git_config_global_get("user.name")
+  ))
+  user_email_exists <- !is.null(tryCatch(
+    git_config_get("user.email", repo = repo),
+    error = function(e) git_config_global_get("user.email")
+  ))
   user_name_exists && user_email_exists
 }

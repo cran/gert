@@ -1,16 +1,6 @@
 #include <string.h>
 #include "utils.h"
 
-static git_strarray *files_to_array(SEXP files){
-  int len = Rf_length(files);
-  git_strarray *paths = malloc(sizeof *paths);
-  paths->count = len;
-  paths->strings = calloc(len, sizeof *paths->strings);
-  for(int i = 0; i < len; i++)
-    paths->strings[i] = strdup(CHAR(STRING_ELT(files, i)));
-  return paths;
-}
-
 SEXP R_git_repository_info(SEXP ptr){
   git_buf buf = {0};
   git_strarray ref_list;
@@ -49,6 +39,14 @@ SEXP R_git_repository_info(SEXP ptr){
       }
     }
     git_reference_free(head);
+  }
+
+  /* If remote still NA (no upstream configured), use sole remote if exactly one */
+  if(STRING_ELT(remote, 0) == NA_STRING){
+    git_strarray remotes = {0};
+    if(git_remote_list(&remotes, repo) == 0 && remotes.count == 1)
+      SET_STRING_ELT(remote, 0, safe_char(remotes.strings[0]));
+    git_strarray_free(&remotes);
   }
 
   SEXP out = build_list(8, "path", path, "bare", bare, "head", headref, "shorthand", shorthand,
@@ -212,4 +210,18 @@ SEXP R_git_status_list(SEXP ptr, SEXP show_staged, SEXP path_spec){
   SEXP out = build_tibble(3, "file", files, "status", statuses, "staged", staged);
   UNPROTECT(3);
   return out;
+}
+
+SEXP R_git_restore(SEXP ptr, SEXP files, SEXP ref){
+  git_repository *repo = get_git_repository(ptr);
+  git_object *obj = resolve_refish(ref, repo);
+  git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+  opts.checkout_strategy = GIT_CHECKOUT_FORCE;
+  git_strarray *paths = files_to_array(files);
+  opts.paths = *paths;
+  int err = git_checkout_tree(repo, obj, &opts);
+  git_strarray_free(paths);
+  git_object_free(obj);
+  bail_if(err, "git_checkout_tree");
+  return R_NilValue;
 }

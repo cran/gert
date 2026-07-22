@@ -3,10 +3,10 @@
 #endif
 
 /* Beginning in libgit2 v1.4.5 and v1.5.1, libgit2 will now perform host key checking by default.
- * However on Windows libssh does not have access to the cert store */
-#if defined(_WIN32)
+ * However we do not want scripts to halt upon the first clone to a host...  */
+//#if defined(_WIN32)
 #define SKIP_HOSTKEY_CHECK
-#endif
+//#endif
 
 #include <string.h>
 #include "utils.h"
@@ -255,16 +255,6 @@ static auth_callback_data_t auth_callback_data(SEXP getkey, SEXP getcred, int ve
   return data_cb;
 }
 
-static git_strarray *files_to_array(SEXP files){
-  int len = Rf_length(files);
-  git_strarray *paths = malloc(sizeof *paths);
-  paths->count = len;
-  paths->strings = calloc(len, sizeof *paths->strings);
-  for(int i = 0; i < len; i++)
-    paths->strings[i] = strdup(CHAR(STRING_ELT(files, i)));
-  return paths;
-}
-
 SEXP R_git_repository_init(SEXP path, SEXP is_bare){
   git_repository *repo = NULL;
   bail_if(git_repository_init(&repo, CHAR(STRING_ELT(path, 0)), Rf_asLogical(is_bare)), "git_repository_init");
@@ -330,7 +320,7 @@ static int repository_enable_cache(git_repository **out, const char *path, int b
 }
 
 SEXP R_git_repository_clone(SEXP url, SEXP path, SEXP branch, SEXP getkey, SEXP getcred,
-                            SEXP bare, SEXP mirror, SEXP verbose){
+                            SEXP bare, SEXP mirror, SEXP depth, SEXP verbose){
   git_repository *repo = NULL;
   git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
   clone_opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
@@ -340,6 +330,16 @@ SEXP R_git_repository_clone(SEXP url, SEXP path, SEXP branch, SEXP getkey, SEXP 
   clone_opts.repository_cb = repository_enable_cache;
 
   set_verify_handler(&clone_opts.fetch_opts.callbacks);
+
+  /* shallow clone: fetch only the last 'depth' commits (libgit2 >= 1.7) */
+  int clone_depth = Rf_asInteger(depth);
+  if(clone_depth > 0){
+#if AT_LEAST_LIBGIT2(1, 7)
+    clone_opts.fetch_opts.depth = clone_depth;
+#else
+    Rf_warning("Shallow clone (depth) requires libgit2 >= 1.7.0. Ignoring the depth parameter.");
+#endif
+  }
 
   /* Also enables download progress and user interrupt */
   if(Rf_asLogical(verbose)){

@@ -15,6 +15,7 @@
 #' @family git
 #' @inheritParams git_open
 #' @useDynLib gert R_git_signature_default
+#' @git signature
 #' @examples # Your default user
 #' try(git_signature_default())
 #'
@@ -71,7 +72,9 @@ offset_to_string <- function(offset) {
     hours <- as.integer(offset %/% 60)
     mins <- as.integer(offset %% 60)
     sprintf('%+03d%02d', hours, mins)
-  } else ""
+  } else {
+    ""
+  }
 }
 
 sig_data_to_string <- function(x) {

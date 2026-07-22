@@ -27,10 +27,11 @@ extern SEXP R_git_commit_create(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_commit_descendant(SEXP, SEXP, SEXP);
 extern SEXP R_git_commit_id(SEXP, SEXP);
 extern SEXP R_git_commit_info(SEXP, SEXP);
-extern SEXP R_git_commit_log(SEXP, SEXP, SEXP, SEXP);
+extern SEXP R_git_commit_log(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_commit_stats(SEXP, SEXP);
 extern SEXP R_git_config_list(SEXP);
-extern SEXP R_git_config_set(SEXP, SEXP, SEXP);
+extern SEXP R_git_config_set(SEXP, SEXP, SEXP, SEXP);
+extern SEXP R_git_config_unset(SEXP, SEXP, SEXP);
 extern SEXP R_git_conflict_list(SEXP);
 extern SEXP R_git_create_branch(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_delete_branch(SEXP, SEXP);
@@ -51,10 +52,11 @@ extern SEXP R_git_remote_ls(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_remote_push(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_remote_refspecs(SEXP, SEXP);
 extern SEXP R_git_remote_remove(SEXP, SEXP);
-extern SEXP R_git_remote_set_pushurl(SEXP, SEXP, SEXP);
 extern SEXP R_git_remote_set_url(SEXP, SEXP, SEXP);
+extern SEXP R_git_restore(SEXP, SEXP, SEXP);
+extern SEXP R_git_revert(SEXP, SEXP);
 extern SEXP R_git_repository_add(SEXP, SEXP, SEXP);
-extern SEXP R_git_repository_clone(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP R_git_repository_clone(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_git_repository_find(SEXP);
 extern SEXP R_git_repository_info(SEXP);
 extern SEXP R_git_repository_init(SEXP, SEXP);
@@ -111,10 +113,11 @@ static const R_CallMethodDef CallEntries[] = {
   {"R_git_commit_descendant",   (DL_FUNC) &R_git_commit_descendant,   3},
   {"R_git_commit_id",           (DL_FUNC) &R_git_commit_id,           2},
   {"R_git_commit_info",         (DL_FUNC) &R_git_commit_info,         2},
-  {"R_git_commit_log",          (DL_FUNC) &R_git_commit_log,          4},
+  {"R_git_commit_log",          (DL_FUNC) &R_git_commit_log,          5},
   {"R_git_commit_stats",        (DL_FUNC) &R_git_commit_stats,        2},
   {"R_git_config_list",         (DL_FUNC) &R_git_config_list,         1},
-  {"R_git_config_set",          (DL_FUNC) &R_git_config_set,          3},
+  {"R_git_config_set",          (DL_FUNC) &R_git_config_set,          4},
+  {"R_git_config_unset",        (DL_FUNC) &R_git_config_unset,        3},
   {"R_git_conflict_list",       (DL_FUNC) &R_git_conflict_list,       1},
   {"R_git_create_branch",       (DL_FUNC) &R_git_create_branch,       5},
   {"R_git_delete_branch",       (DL_FUNC) &R_git_delete_branch,       2},
@@ -135,10 +138,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"R_git_remote_push",         (DL_FUNC) &R_git_remote_push,         6},
   {"R_git_remote_refspecs",     (DL_FUNC) &R_git_remote_refspecs,     2},
   {"R_git_remote_remove",       (DL_FUNC) &R_git_remote_remove,       2},
-  {"R_git_remote_set_pushurl",  (DL_FUNC) &R_git_remote_set_pushurl,  3},
   {"R_git_remote_set_url",      (DL_FUNC) &R_git_remote_set_url,      3},
   {"R_git_repository_add",      (DL_FUNC) &R_git_repository_add,      3},
-  {"R_git_repository_clone",    (DL_FUNC) &R_git_repository_clone,    8},
+  {"R_git_repository_clone",    (DL_FUNC) &R_git_repository_clone,    9},
   {"R_git_repository_find",     (DL_FUNC) &R_git_repository_find,     1},
   {"R_git_repository_info",     (DL_FUNC) &R_git_repository_info,     1},
   {"R_git_repository_init",     (DL_FUNC) &R_git_repository_init,     2},
@@ -147,6 +149,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"R_git_repository_path",     (DL_FUNC) &R_git_repository_path,     1},
   {"R_git_repository_rm",       (DL_FUNC) &R_git_repository_rm,       2},
   {"R_git_reset",               (DL_FUNC) &R_git_reset,               3},
+  {"R_git_restore",             (DL_FUNC) &R_git_restore,             3},
+  {"R_git_revert",              (DL_FUNC) &R_git_revert,              2},
   {"R_git_signature_create",    (DL_FUNC) &R_git_signature_create,    4},
   {"R_git_signature_default",   (DL_FUNC) &R_git_signature_default,   1},
   {"R_git_signature_parse",     (DL_FUNC) &R_git_signature_parse,     1},

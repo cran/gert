@@ -15,6 +15,7 @@
 #' @rdname git_fetch
 #' @inheritParams git_open
 #' @useDynLib gert R_git_remote_fetch
+#' @git remote
 #' @param remote Optional. Name of a remote listed in [git_remote_list()]. If
 #'   unspecified and the current branch is already tracking branch a remote
 #'   branch, that remote is honored. Otherwise, defaults to `origin`.
@@ -36,7 +37,9 @@ git_fetch <- function(
 ) {
   repo <- git_open(repo)
   info <- git_info(repo)
-  if (!length(remote)) remote <- info$remote
+  if (!length(remote)) {
+    remote <- info$remote
+  }
   remote <- as.character(remote)
   if (!length(remote) || is.na(remote)) {
     if (is.na(match("origin", git_remote_list(repo = repo)$name))) {
@@ -77,7 +80,9 @@ git_remote_ls <- function(
 ) {
   repo <- git_open(repo)
   info <- git_info(repo)
-  if (!length(remote)) remote <- info$remote
+  if (!length(remote)) {
+    remote <- info$remote
+  }
   remote <- as.character(remote)
   if (!length(remote) || is.na(remote)) {
     if (is.na(match("origin", git_remote_list(repo = repo)$name))) {
@@ -115,7 +120,9 @@ git_push <- function(
   info <- git_info(repo)
   verbose <- as.logical(verbose)
 
-  if (!length(remote)) remote <- info$remote
+  if (!length(remote)) {
+    remote <- info$remote
+  }
 
   remote <- as.character(remote)
 
@@ -136,17 +143,22 @@ git_push <- function(
     refs <- refs[!grepl("^refs/pull", refs)]
     refspec <- paste0(refs, ":", refs)
   }
-  if (!length(refspec)) refspec <- info$head
+  if (!length(refspec)) {
+    refspec <- info$head
+  }
   refspec <- as.character(refspec)
-  if (isTRUE(force)) refspec <- sub("^\\+?", "+", refspec)
+  if (isTRUE(force)) {
+    refspec <- sub("^\\+?", "+", refspec)
+  }
 
   host <- remote_to_host(repo, remote)
   key_cb <- make_key_cb(ssh_key, host = host, password = password)
   cred_cb <- make_cred_cb(password = password, verbose = verbose)
 
   .Call(R_git_remote_push, repo, remote, refspec, key_cb, cred_cb, verbose)
-  if (is.null(set_upstream))
+  if (is.null(set_upstream)) {
     set_upstream <- isTRUE(is.na(info$upstream)) && !isTRUE(info$bare)
+  }
 
   if (isTRUE(set_upstream)) {
     git_branch_set_upstream(paste0(remote, "/", info$shorthand), repo = repo)
@@ -157,16 +169,24 @@ git_push <- function(
 #' @export
 #' @rdname git_fetch
 #' @useDynLib gert R_git_repository_clone
+#' @git clone
 #' @param url remote url. Typically starts with `https://github.com/` for public
 #' repositories, and `https://yourname@github.com/` or `git@github.com/` for
 #' private repos. You will be prompted for a password or pat when needed.
 #' @param path Directory of the Git repository to create.
+#' By default, the "humanish" part of the URL.
+#' For instance, "git@github.com:someone/myrepo.git" will be cloned to
+#' `myrepo/`.
 #' @param ssh_key path or object containing your ssh private key. By default we
-#' look for keys in `ssh-agent` and [credentials::ssh_key_info].
+#' look for keys in `ssh-agent` and [credentials::ssh_key_info()].
 #' @param branch name of branch to check out locally
 #' @param password a string or a callback function to get passwords for authentication
-#' or password protected ssh keys. Defaults to [askpass][askpass::askpass] which
+#' or password protected ssh keys. Defaults to [askpass][askpass::askpass()] which
 #' checks `getOption('askpass')`.
+#' @param depth number of commits to fetch when creating a shallow clone. The
+#' default `0` clones the entire history. A positive value truncates the history
+#' to the given number of commits from the tip of each branch. Requires
+#' libgit2 >= 1.7.0.
 #' @param verbose display some progress info while downloading
 #' @examples {# Clone a small repository
 #' git_dir <- file.path(tempdir(), 'antiword')
@@ -204,12 +224,26 @@ git_clone <- function(
   ssh_key = NULL,
   bare = FALSE,
   mirror = FALSE,
+  depth = 0,
   verbose = interactive()
 ) {
   stopifnot(is.character(url))
-  if (!length(path)) path <- file.path(getwd(), basename(url))
+  # "humanish" part of the URL
+  # https://github.com/git/git/blob/6e8d538aab8fe4dd07ba9fb87b5c7edcfa5706ad/dir.h#L494
+  if (!length(path)) {
+    path <- file.path(
+      getwd(),
+      sub("\\.git$", "", sub("/.git$", "", basename(url)))
+    )
+  }
   stopifnot(is.character(path))
   stopifnot(is.null(branch) || is.character(branch))
+  stopifnot(
+    "`depth` must be an integer >= 0" = is.numeric(depth) &&
+      length(depth) == 1 &&
+      depth >= 0
+  )
+  depth <- as.integer(depth)
   verbose <- as.logical(verbose)
   path <- normalizePath(path.expand(path), mustWork = FALSE)
   host <- url_to_host(url)
@@ -224,6 +258,7 @@ git_clone <- function(
     cred_cb,
     bare,
     mirror,
+    depth,
     verbose
   )
   git_repo_path(repo)
@@ -233,12 +268,14 @@ git_clone <- function(
 #' @rdname git_fetch
 #' @param rebase if TRUE we try to rebase instead of merge local changes. This
 #' is not possible in case of conflicts (you will get an error).
-#' @param ... arguments passed to [git_fetch]
+#' @param ... arguments passed to `git_fetch()`
 git_pull <- function(remote = NULL, rebase = FALSE, ..., repo = '.') {
   repo <- git_open(repo)
   info <- git_info(repo)
   branch <- info$shorthand
-  if (branch == "HEAD") stop("Repository is currently in a detached head state")
+  if (branch == "HEAD") {
+    stop("Repository is currently in a detached head state")
+  }
 
   upstream <- if (length(remote) && nchar(remote)) {
     paste0(remote, '/', branch)
@@ -246,8 +283,9 @@ git_pull <- function(remote = NULL, rebase = FALSE, ..., repo = '.') {
     info$upstream
   }
 
-  if (!length(upstream) || is.na(upstream) || !nchar(upstream))
+  if (!length(upstream) || is.na(upstream) || !nchar(upstream)) {
     stop("No upstream configured for current branch, please specify a remote")
+  }
 
   if (grepl(".*/pr/\\d+$", upstream)) {
     pr <- utils::tail(strsplit(upstream, '/pr/', fixed = TRUE)[[1]], 1)
@@ -257,13 +295,15 @@ git_pull <- function(remote = NULL, rebase = FALSE, ..., repo = '.') {
     inform("Local upstream, skipping fetch")
   } else {
     git_fetch(remote, ..., repo = repo)
-    if (!git_branch_exists(upstream, local = FALSE, repo = repo))
+    if (!git_branch_exists(upstream, local = FALSE, repo = repo)) {
       stop("Failed to fetch upstream branch: ", upstream)
+    }
   }
   if (isTRUE(rebase)) {
     rebase_df <- git_rebase_list(upstream = upstream, repo = repo)
-    if (any(rebase_df$conflicts))
+    if (any(rebase_df$conflicts)) {
       stop("Found conflicts, rebase not possible. Retry with rebase = FALSE")
+    }
     git_rebase_commit(upstream = upstream, repo = repo)
   } else {
     git_merge(upstream, repo = repo)

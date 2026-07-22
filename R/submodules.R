@@ -1,11 +1,13 @@
 #' Submodules
 #'
-#' Interact with submodules in the repository.
+#' Interact with [submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
+#' in the repository.
 #'
 #' @export
 #' @rdname git_submodule
 #' @inheritParams git_open
 #' @useDynLib gert R_git_submodule_list
+#' @git submodule
 git_submodule_list <- function(repo = '.') {
   repo <- git_open(repo)
   .Call(R_git_submodule_list, repo)
@@ -48,8 +50,9 @@ git_submodule_set_to <- function(submodule, ref, checkout = TRUE, repo = '.') {
   } else if (!is_full_hash(ref)) {
     ref <- git_commit_info(ref, repo = I(info$path))$id
   }
-  if (!is_full_hash(ref))
+  if (!is_full_hash(ref)) {
     stop("When checkout = FALSE, parameter ref must be a full hash")
+  }
   .Call(R_git_submodule_set_to, repo, submodule, ref)
 }
 
@@ -58,7 +61,7 @@ git_submodule_set_to <- function(submodule, ref, checkout = TRUE, repo = '.') {
 #' @param url full git url of the submodule
 #' @param path relative of the submodule
 #' @param ref a branch or tag or hash with
-#' @param ... extra arguments for [git_fetch] for authentication things
+#' @param ... extra arguments for [git_fetch()] for authentication things
 git_submodule_add <- function(
   url,
   path = basename(url),

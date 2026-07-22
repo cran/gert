@@ -8,6 +8,7 @@
 #' @family git
 #' @inheritParams git_open
 #' @useDynLib gert R_git_branch_current
+#' @git branch
 git_branch <- function(repo = '.') {
   repo <- git_open(repo)
   .Call(R_git_branch_current, repo)
@@ -28,6 +29,66 @@ git_branch_list <- function(local = NULL, repo = '.') {
 #' @param force ignore conflicts and overwrite modified files
 #' @param orphan if branch does not exist, checkout unborn branch
 #' @useDynLib gert R_git_checkout_branch R_git_checkout_unborn
+#' @git checkout
+#' @param force overwrite existing branch
+#' @examplesIf interactive()
+#' # Creating a branch
+#' repo <- file.path(tempdir(), "myrepo")
+#' git_init(repo)
+#' writeLines("hello", file.path(repo, "hello.txt"))
+#' git_add("hello.txt", repo = repo)
+#' first_commit <- git_commit("First commit", repo = repo)
+#'
+#' git_branch_create("new-feat", repo = repo)
+#' writeLines("world", file.path(repo, "hello.txt"))
+#' git_add("hello.txt", repo = repo)
+#' second_commit <- git_commit("Second commit", repo = repo)
+#'
+#' # Changing branches
+#' git_branch(repo = repo)
+#' git_branch_switch("main", repo = repo)
+#' git_branch(repo = repo)
+#'
+#' git_branch_exists("new-feat", repo = repo)
+#'
+#' # Listing branches
+#' git_branch_list(repo = repo)
+#'
+#' # Renaming a branch
+#' git_branch_move("new-feat", "better-name", repo = repo)
+#' git_branch_exists("new-feat", repo = repo)
+#' git_branch_list(repo = repo)
+#'
+#' # Deleting a branch
+#' git_branch_delete("better-name", repo = repo)
+#' git_branch_exists("better-name", repo = repo)
+#'
+#' # clean up
+#' unlink(repo, recursive = TRUE)
+#' # ------------------------
+#' # Creating an orphan branch
+#' repo <- file.path(tempdir(), "myrepo")
+#' git_init(repo)
+#'
+#' # Set a user if no default
+#' if (!user_is_configured()) {
+#'   git_config_set("user.name", "Jerry")
+#'   git_config_set("user.email", "jerry@gmail.com")
+#' }
+#' writeLines("hello", file.path(repo, "hello.txt"))
+#' git_add("hello.txt", repo = repo)
+#' first_commit <- git_commit("First commit", repo = repo)
+#'
+#' writeLines("world", file.path(repo, "hello.txt"))
+#' git_add("hello.txt", repo = repo)
+#' second_commit <- git_commit("Second commit", repo = repo)
+#'
+#' # Check out first commit
+#' git_branch_checkout(first_commit, orphan = TRUE, repo = repo)
+#' git_status(repo)
+#' # clean up
+#' unlink(repo, recursive = TRUE)
+#'
 git_branch_checkout <- function(
   branch,
   force = FALSE,
@@ -60,6 +121,10 @@ git_branch_checkout <- function(
   }
   .Call(R_git_checkout_branch, repo, branch, force)
 }
+
+#' @rdname git_branch
+#' @export
+git_branch_switch <- git_branch_checkout
 
 #' @export
 #' @rdname git_branch
@@ -108,8 +173,9 @@ git_branch_move <- function(branch, new_branch, force = FALSE, repo = '.') {
 #' @rdname git_branch
 git_branch_fast_forward <- function(ref, repo = '.') {
   analysis <- git_merge_analysis(ref = ref, repo = repo)
-  if (analysis != "fastforward")
+  if (analysis != "fastforward") {
     stop("Branch cannot be fast-forwarded. Use git_merge() instead")
+  }
   git_branch_set_target(ref = ref, repo = repo)
 }
 
@@ -124,8 +190,9 @@ git_branch_set_upstream <- function(
 ) {
   repo <- git_open(repo)
   stopifnot(is.character(upstream))
-  if (!git_branch_exists(upstream, local = FALSE, repo = repo))
+  if (!git_branch_exists(upstream, local = FALSE, repo = repo)) {
     stop(sprintf("No remote branch found: %s, maybe fetch first?", upstream))
+  }
   .Call(R_git_branch_set_upstream, repo, upstream, branch)
   git_repo_path(repo)
 }

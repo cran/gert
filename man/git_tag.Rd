@@ -20,7 +20,7 @@ git_tag_push(name, ..., repo = ".")
 \item{match}{pattern to filter tags (use \code{*} for wildcard)}
 
 \item{repo}{The path to the git repository. If the directory is not a
-repository, parent directories are considered (see \link{git_find}). To disable
+repository, parent directories are considered (see \code{\link[=git_find]{git_find()}}). To disable
 this search, provide the filepath protected with \code{\link[=I]{I()}}. When using this
 parameter, always explicitly call by name (i.e. \verb{repo = }) because future
 versions of gert may have additional parameters.}
@@ -31,27 +31,32 @@ versions of gert may have additional parameters.}
 
 \item{ref}{target reference to tag}
 
-\item{...}{other arguments passed to \link{git_push}}
+\item{...}{other arguments passed to \code{\link[=git_push]{git_push()}}}
 }
 \description{
 Create and list tags.
 }
 \seealso{
-Other git: 
+Other git:
 \code{\link{git_archive}},
-\code{\link{git_branch}()},
-\code{\link{git_commit}()},
-\code{\link{git_config}()},
-\code{\link{git_diff}()},
-\code{\link{git_fetch}()},
+\code{\link[=git_branch]{git_branch()}},
+\code{\link[=git_commit]{git_commit()}},
+\code{\link[=git_config]{git_config()}},
+\code{\link[=git_diff]{git_diff()}},
+\code{\link[=git_fetch]{git_fetch()}},
+\code{\link{git_history}},
 \code{\link{git_ignore}},
-\code{\link{git_merge}()},
-\code{\link{git_rebase}()},
+\code{\link[=git_merge]{git_merge()}},
+\code{\link[=git_rebase]{git_rebase()}},
 \code{\link{git_remote}},
 \code{\link{git_repo}},
-\code{\link{git_reset}()},
-\code{\link{git_signature}()},
+\code{\link[=git_reset]{git_reset()}},
+\code{\link[=git_restore]{git_restore()}},
+\code{\link[=git_revert]{git_revert()}},
+\code{\link[=git_signature]{git_signature()}},
 \code{\link{git_stash}},
 \code{\link{git_worktree}}
 }
 \concept{git}
+\section{Related libgit2 documentation}{\href{https://libgit2.org/docs/reference/main/tag/index.html}{\code{tag}}.}
+

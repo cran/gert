@@ -49,7 +49,7 @@ SEXP R_git_create_branch(SEXP ptr, SEXP name, SEXP ref, SEXP checkout, SEXP forc
   git_reference *branch = NULL;
   const char *source = CHAR(STRING_ELT(ref, 0));
   git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-  opts.checkout_strategy = GIT_CHECKOUT_SAFE;
+  opts.checkout_strategy = Rf_asLogical(force) ? GIT_CHECKOUT_FORCE : GIT_CHECKOUT_SAFE;
   set_checkout_notify_cb(&opts);
   git_repository *repo = get_git_repository(ptr);
   git_object *revision = resolve_refish(ref, repo);
@@ -236,17 +236,7 @@ SEXP R_git_remote_set_url(SEXP ptr, SEXP name, SEXP url){
   return out;
 }
 
-SEXP R_git_remote_set_pushurl(SEXP ptr, SEXP name, SEXP url){
-  git_remote * remote = NULL;
-  const char *curl = Rf_length(url) ? CHAR(STRING_ELT(url, 0)) : NULL;
-  const char *cname = CHAR(STRING_ELT(name, 0));
-  git_repository *repo = get_git_repository(ptr);
-  bail_if(git_remote_lookup(&remote, repo, cname), "git_remote_lookup");
-  bail_if(git_remote_set_pushurl(repo, cname, curl), "git_remote_set_url");
-  SEXP out = safe_string(git_remote_pushurl(remote));
-  git_remote_free(remote);
-  return out;
-}
+
 
 SEXP R_git_remote_remove(SEXP ptr, SEXP name){
   const char *cname = CHAR(STRING_ELT(name, 0));
