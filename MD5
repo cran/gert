@@ -1,7 +1,7 @@
-6cb09a96494af7810f0524bafb07178e *DESCRIPTION
+c091dd2c2225dee40f3362ade6eb37cb *DESCRIPTION
 5acd18f82cf3f814c4455a6f785249f2 *LICENSE
 c5c844e6f13dbef8c6685bef2238e6c0 *NAMESPACE
-c21db6a6b8b63f8aa03de43b8526745f *NEWS.md
+1607e7c1c4e1cb22e1bfcf3e817e419c *NEWS.md
 25ba3d1e1378b15b6ba99e84e76b8bdb *R/archive.R
 ad9464ba88487fa77a2e96fbdb433187 *R/branch.R
 c2969f39481d590ff7721d730e4fc11b *R/certs.R
@@ -29,12 +29,12 @@ acbd0bf0112b36c703b5a7fad708d96f *R/tag.R
 97017df033beced5a1b0017879ad1ebd *R/utils-sha.R
 83c91981ce7b8352f51f97752104157f *R/worktree.R
 7059f26393e7cfc9d9ba1d1e072d61c7 *build/vignette.rds
-a747b285beccecbe521693b29d75d6c9 *cleanup
+9500f25e755e828053b8d1ba43f5bc27 *cleanup
 a97ee87c67e6f285b2969ec9beec9a73 *configure
 f6f57b36d9b6c53246d77abcd028c5ec *inst/WORDLIST
 0e3ad44fffb2f0c56f39ef08cf2edea4 *inst/doc/gert.R
 198d60c34c449963dbf7c922055d8d80 *inst/doc/gert.Rmd
-1e2b0c95d36de8274cbb1ecb2a9ab7b5 *inst/doc/gert.html
+d708c770f487432ec8d4193d8a952cff *inst/doc/gert.html
 0b2325419072c7db4ba095f73448714b *man/figures/logo.png
 5283b6f246340e0f02374a2fd5f16c63 *man/gert-package.Rd
 a02f0afc8bc91814c45bc07e71074de6 *man/git_archive.Rd
@@ -70,7 +70,7 @@ c2ca4170f8894d69e5e8152cd858f42d *src/branch.c
 d8b6e2d68d87c0b21bb00207573eb6ad *src/conflicts.c
 4a027da08af1cd529ee999799d0a4dfd *src/files.c
 3173e75c52b850ba5e9e8c7b06803e8a *src/ignore.c
-f86cdb90e71c92cd505aa6e14079fa9b *src/init.c
+2fa54bc7ee3a817e905302aab79f6b4d *src/init.c
 0a0d6c09590bc610399385a11cc159af *src/merge.c
 7da22e7cb9671fb4b14b1a7251ed8a70 *src/rebase.c
 db4af265cf7d3cf87936991a14f75e9c *src/stash.c

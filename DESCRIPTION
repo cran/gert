@@ -1,7 +1,7 @@
 Type: Package
 Package: gert
 Title: Simple Git Client for R
-Version: 2.4.0
+Version: 2.4.1
 Authors@R: c(
     person("Jeroen", "Ooms", role = c("aut", "cre"), email = "jeroenooms@gmail.com",
       comment = c(ORCID = "0000-0002-4035-0289")),
@@ -28,10 +28,10 @@ Language: en-US
 Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 NeedsCompilation: yes
-Packaged: 2026-07-22 09:03:39 UTC; jeroen
+Packaged: 2026-08-19 12:38:16 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>),
   Maëlle Salmon [aut] (ORCID: <https://orcid.org/0000-0002-2815-0399>),
   Jennifer Bryan [ctb] (ORCID: <https://orcid.org/0000-0002-6983-2759>)
 Maintainer: Jeroen Ooms <jeroenooms@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-07-22 09:40:02 UTC
+Date/Publication: 2026-08-19 14:20:02 UTC
